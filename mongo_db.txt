@@ -1,0 +1,12 @@
+INSTALLING AND USING MONGODB
+
+1. If not already installed, install Homebrew: https://brew.sh/
+2. In terminal: brew install mongodb
+3. In terminal: mkdir -p ~/data/db (local directory for database contents)
+
+To start a MongoDB process, type the following in the terminal: mongod --dbpath ~/data/db
+
+USING MONGODB WITH PYTHON
+
+1. In terminal (virtual environment optional): pip install pymongo==3.7.1
+2. See mongo_db.py file
