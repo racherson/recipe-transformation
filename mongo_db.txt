@@ -8,5 +8,5 @@ To start a MongoDB process, type the following in the terminal: mongod --dbpath 
 
 USING MONGODB WITH PYTHON
 
-1. In terminal (virtual environment optional): pip install pymongo==3.7.1
+1. In terminal: pip install pymongo==3.7.1 (use "conda install -n [env_name] pymongo==3.7.1" instead to install in virtual environment)
 2. See mongo_db.py file
