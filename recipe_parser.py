@@ -2,10 +2,96 @@ import functools
 import pymongo
 import urllib.request
 from bs4 import BeautifulSoup
+import nltk
+from pprint import pprint
+import collections
+nltk.download('punkt')
 
+# global variables (NEED TO ADD MORE)
+METHODS = ['saute', 'broil', 'boil', 'poach', 'bake', 'grill', 'fry', 'bake', 'heat', 'mix', 'chop', 'grate', 'stir', 'shake', 'mince', 'crush', 'squeeze', 'dice']
+TOOLS = ['pan', 'grater', 'whisk', 'pot', 'spatula', 'tong', 'oven', 'knife']
+stopwords = nltk.corpus.stopwords.words('english')
+custom_stopwords = [",",".","!","?","(",")"]
+stopwords.extend(custom_stopwords)
+
+# recipe class definition
+class Recipe:
+    def __init__(self, url):
+        # take url and load recipe from web
+        self.url = url
+        html = urllib.request.urlopen(url)
+        self.soup = BeautifulSoup(html, 'html.parser')
+
+        # get name of recipe
+        name = self.soup.find("h1", {"id": "recipe-main-content"})
+        self.name = name.string
+        print ('Name: ', self.name)
+
+        # get ingredients
+        ingredients = self.soup.find_all("span", class_="recipe-ingred_txt added")
+        self.ingredients = [add_ingredient(ingredient.contents[0]) for ingredient in ingredients]
+        self.substitute_ingredients = substitute_ingredients(self.ingredients)
+        print ('Ingredients: ')
+        for ingredient in self.substitute_ingredients:
+            print(ingredient)
+
+        # get steps (list of steps where each item can be multiple sentences)
+        self.steps = self.get_steps()
+        print ('Steps: ', self.steps)
+
+        # get tools
+        self.tools, methods_counter = self.get_tools_methods()
+        self.tools = list(self.tools)
+        print ('Tools: ', self.tools)
+
+        # get primary method (most commonly mentioned method) and other methods if exist
+        self.primary_method = methods_counter.most_common(1)[0][0]
+        del methods_counter[self.primary_method]
+        self.other_methods = list(methods_counter)
+        print ('Primary method: ', self.primary_method)
+        print ('Other methods: ', self.other_methods)
+
+    def get_steps(self):
+        # get steps from html
+        steps = self.soup.find("ol", {"class":"list-numbers recipe-directions__list"})
+        substeps = steps("li")
+        final_steps = []
+        for s in substeps:
+            curr_step = s.find("span").string
+            final_steps.append(curr_step.strip())
+
+        return final_steps
+
+    def get_tools_methods(self):
+        tools = set() # unique set
+        methods_counter = collections.Counter() # frequency mapping
+        for step in self.steps:
+            tokens = nltk.word_tokenize(step)
+            tokens = [token.lower() for token in tokens if not token in stopwords]
+            bigrams = nltk.bigrams(tokens)
+            # check tokens in unigrams
+            for token in tokens:
+                if token in TOOLS:
+                    tools.add(token)
+                if token in METHODS:
+                    methods_counter[token] += 1
+
+            # check tokens in bigrams
+            for token in bigrams:
+                if token in TOOLS:
+                    tools.add(token)
+                if token in METHODS:
+                    methods_counter[token] += 1
+
+        return tools, methods_counter
+
+    def make_json(self):
+        recipe = {'ingredients': self.ingredients, 'tools': self.tools, 'primary_method': self.primary_method, 'other_methods': self.other_methods, 'steps': self.steps}
+        res = json.dumps(recipe)
+        pprint (res)
+        return res
 
 # ingredient class definition
-
 class Ingredient:
     def __init__(self, name, adjective, category, amount, unit):
         self.name = name
@@ -26,7 +112,6 @@ class Ingredient:
 
 
 # ingredient instantiation functions
-
 def ingredient_base(ingredient):
     ingredient.name = ingredient.adjective
     ingredient.adjective = None
@@ -129,6 +214,7 @@ cuisine_substitutions_adjectives = {}
 cuisine_substitutions_categories = {}
 cuisine_substitutions_exceptions = {}
 
+# helper functions
 
 def make_substitutions(ingredient, substitutions, added_ingredients):
     if "substitutions" in substitutions:
@@ -176,6 +262,7 @@ def substitute_ingredients(ingredients):
         ingredients.remove(ingredient)
     ingredients += added_ingredients
 
+    return ingredients
 
 def add_ingredient(ingredient_text):
     adjective = None
@@ -207,19 +294,18 @@ def add_ingredient(ingredient_text):
     return Ingredient(name, adjective, category, amount, unit)
 
 
-def transform_recipe(html):
-    soup = BeautifulSoup(html, 'html.parser')
-    print (soup)
-    ingredients = soup.find_all("span", class_="recipe-ingred_txt added")
-    ingredients = [add_ingredient(ingredient.contents[0]) for ingredient in ingredients]
-    substitute_ingredients(ingredients)
-    for ingredient in ingredients:
-        print(ingredient)
-    return
-
+# def transform_recipe(html):
+#     soup = BeautifulSoup(html, 'html.parser')
+#     ingredients = soup.find_all("span", class_="recipe-ingred_txt added")
+#     ingredients = [add_ingredient(ingredient.contents[0]) for ingredient in ingredients]
+#     substitute_ingredients(ingredients)
+#     for ingredient in ingredients:
+#         print(ingredient)
+#     return
 
 if __name__ == "__main__":
     url = "https://www.allrecipes.com/recipe/173906/cajun-roasted-pork-loin/"
     # url = input("Please provide a recipe URL: ")
     html = urllib.request.urlopen(url)
-    transform_recipe(html)
+    #transform_recipe(html)
+    Recipe(url)
