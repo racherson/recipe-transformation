@@ -305,8 +305,10 @@ vegetarian_substitutions_exceptions = {}
 # cuisine (thai) substitutions dictionaries
 
 cuisine_substitutions_names = {
-    "salt": {"substitutions": [functools.partial(change_name, "sauce"),
-                               functools.partial(change_adjective, "fish")]},
+    "salt": {"substitutions": [functools.partial(change_name, "fish sauce"),
+                               functools.partial(change_adjective, "thai"),
+                               functools.partial(change_amount, 1),
+                               functools.partial(change_unit, "tablespoon")]},
     "broccoli": {"substitutions": [functools.partial(change_adjective, "chinese")]},
     "pasta": {"substitutions": [functools.partial(change_adjective, "rice"),
                                 functools.partial(change_name, "noodles")]},
@@ -332,6 +334,47 @@ def make_substitutions(ingredient, substitutions, added_ingredients):
     if "remove" in substitutions:
         return True, new_name
     return False, new_name
+
+
+def make_vegetarian(ingredients):
+    global vegetarian_substitutions_names
+    global vegetarian_substitutions_adjectives
+    global vegetarian_substitutions_categories
+    global vegetarian_substitutions_exceptions
+    added_ingredients = []
+    removed_ingredients = []
+    global ingredient_switches
+    for ingredient in ingredients:
+        full_name = ingredient.name
+        if ingredient.adjective:
+            full_name = ingredient.adjective + " " + full_name
+        if full_name in vegetarian_substitutions_exceptions:
+            removed, new_name = make_substitutions(ingredient, vegetarian_substitutions_exceptions[full_name], added_ingredients)
+            ingredient_switches[ingredient.name] = new_name
+            continue
+        if ingredient.name in vegetarian_substitutions_names:
+            removed, new_name = make_substitutions(ingredient, vegetarian_substitutions_names[ingredient.name], added_ingredients)
+            ingredient_switches[ingredient.name] = new_name
+            if removed:
+                removed_ingredients.append(ingredient)
+                continue
+        if ingredient.adjective in vegetarian_substitutions_adjectives:
+            removed, new_name = make_substitutions(ingredient, vegetarian_substitutions_adjectives[ingredient.adjective], added_ingredients)
+            ingredient_switches[ingredient.name] = new_name
+            if removed:
+                removed_ingredients.append(ingredient)
+                continue
+        if ingredient.category in vegetarian_substitutions_categories:
+            removed, new_name = make_substitutions(ingredient, vegetarian_substitutions_categories[ingredient.category], added_ingredients)
+            ingredient_switches[ingredient.name] = new_name
+            if removed:
+                removed_ingredients.append(ingredient)
+                continue
+    for ingredient in removed_ingredients:
+        ingredients.remove(ingredient)
+    ingredients += added_ingredients
+
+    return ingredients
 
 
 def substitute_ingredients(ingredients, bake):
