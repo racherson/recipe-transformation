@@ -284,15 +284,34 @@ baking_healthy_substitutions_exceptions = {
 
 # vegetarian substitutions dictionaries
 
-vegetarian_substitutions_names = {}
-vegetarian_substitutions_adjectives = {}
+vegetarian_substitutions_names = {
+    "chicken": {"substitutions": [functools.partial(change_name, "tofu")]},
+    "pork": {"substitutions": [functools.partial(change_name, "tofu")]},
+    "beef": {"substitutions": [functools.partial(change_name, "lentils")]},
+    "steak": {"substitutions": [functools.partial(change_name, "mushroom"),
+                                functools.partial(change_adjective, "portobello")]},
+    "bacon": {"substitutions": [functools.partial(change_adjective, "seitan")]},
+    "fish": {"substitutions": [functools.partial(change_name, "tofu")]}
+}
+vegetarian_substitutions_adjectives = {
+    "chicken": {"substitutions": [functools.partial(change_adjective, "vegetable")]},
+    "pork": {"substitutions": [functools.partial(change_adjective, "vegetable")]},
+    "beef": {"substitutions": [functools.partial(change_adjective, "vegetable")]},
+}
 vegetarian_substitutions_categories = {}
 vegetarian_substitutions_exceptions = {}
 
 
-# cuisine substitutions dictionaries
+# cuisine (thai) substitutions dictionaries
 
-cuisine_substitutions_names = {}
+cuisine_substitutions_names = {
+    "salt": {"substitutions": [functools.partial(change_name, "sauce"),
+                               functools.partial(change_adjective, "fish")]},
+    "broccoli": {"substitutions": [functools.partial(change_adjective, "chinese")]},
+    "pasta": {"substitutions": [functools.partial(change_adjective, "rice"),
+                                functools.partial(change_name, "noodles")]},
+    "noodles": {"substitutions": [functools.partial(change_adjective, "rice")]},
+}
 cuisine_substitutions_adjectives = {}
 cuisine_substitutions_categories = {}
 cuisine_substitutions_exceptions = {}
