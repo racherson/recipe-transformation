@@ -313,9 +313,17 @@ cuisine_substitutions_names = {
     "pasta": {"substitutions": [functools.partial(change_adjective, "rice"),
                                 functools.partial(change_name, "noodles")]},
     "noodles": {"substitutions": [functools.partial(change_adjective, "rice")]},
+    "milk": {"substitutions": [functools.partial(change_adjective, "coconut")]},
+    "onions": {"substitutions": [functools.partial(change_name, "shallots")]},
+    "basil": {"substitutions": [functools.partial(change_adjective, "thai")]},
 }
-cuisine_substitutions_adjectives = {}
-cuisine_substitutions_categories = {}
+cuisine_substitutions_adjectives = {
+    "whole-wheat": {"substitutions": [functools.partial(change_adjective, "rice")]}
+}
+cuisine_substitutions_categories = {
+    "sauce": {"substitutions": [functools.partial(change_adjective, "thai"),
+                                functools.partial(change_name, "curry paste")]}
+}
 cuisine_substitutions_exceptions = {}
 
 # helper functions
