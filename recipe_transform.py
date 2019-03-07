@@ -19,8 +19,9 @@ ingredient_switches = {}
 ingredient_categories = {
     "healthy_fats": ['olive oil', 'sunflower oil', 'soybean oil', 'corn oil',  'sesame oil',  'peanut oil'],
     "unhealthy_fats": ['butter', 'lard', 'shortening', 'canola oil', 'margarine',  'coconut oil',  'tallow',  'cream', 'milk fat',  'palm oil',  'palm kemel oil',  'chicken fat',  'hydrogenated oils'],
-    "healthy_protein": [ 'peas',  'beans', 'eggs', 'crab', 'fish','chicken', 'tofu', 'liver', 'turkey'],
+    "healthy_protein": ['peas',  'beans', 'eggs', 'crab', 'fish', 'chicken', 'tofu', 'liver', 'turkey'],
     "unhealthy_protein": ['ground beef', 'beef', 'pork', 'lamb'],
+    "meat": ['ground beef', 'beef', 'pork', 'lamb', 'crab', 'fish', 'chicken', 'turkey', 'liver'],
     "healthy_dairy": ['fat free milk', 'low fat milk', 'yogurt',  'low fat cheese'],
     "unhealthy_dairy": ['reduced-fat milk', 'cream cheese', 'whole milk', 'butter', 'cheese', 'whipped cream', 'sour cream'],
     "healthy_salts": ['low sodium soy sauce', 'sea salt', 'kosher salt'],
@@ -31,6 +32,7 @@ ingredient_categories = {
     "unhealthy_sugars": ['aspartame', 'acesulfame K', 'sucralose', 'white sugar', 'corn syrup', 'chocolate syrup']
 }
 # categorized foods found at https://github.com/olivergoodman/food-recipes/blob/master/transforms.py
+
 
 # recipe class definition
 class Recipe:
