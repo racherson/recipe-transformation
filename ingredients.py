@@ -324,6 +324,10 @@ def change_unit(unit, ingredient):
     return ingredient.name
 
 
+def change_method(method):
+    pass
+
+
 # healthy substitutions dictionaries
 
 healthy_substitutions_names = {
