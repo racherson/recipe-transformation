@@ -147,8 +147,26 @@ class Recipe:
     def make_unhealthy(self):
         print('Making unhealthy...')
         for step in self.steps:
-            make_unhealthy_substitutions(step.ingredients, self.ingredient_switches, self.bake)
+            make_unhealthy_substitutions(step.ingredients, self.ingredient_switches, self.bake, self.steps)
         self.alter_steps()
+        next_count = int(self.steps[-1].text[0]) + 1
+        if not self.bake:
+            more_salt = Ingredient("salt", "extra", "topping", "", "")
+            self.ingredients.append(more_salt)
+            step_text = str(next_count) + ". " + "Sprinkle a lot of extra salt over the whole meal."
+            new_step = Step(step_text, [more_salt])
+            new_step.methods = ["sprinkle"]
+            self.steps.append(new_step)
+        else:
+            add_frosting = Ingredient("frosting", "chocolate", "topping", 2, "cups")
+            self.ingredients.append(add_frosting)
+            step_text = str(next_count) + ". " + "Spread frosting over everything."
+            new_step = Step(step_text, [add_frosting])
+            new_step.methods = ["spread"]
+            self.steps.append(new_step)
+        print('Altered Ingredients:')
+        for ingredient in self.ingredients:
+            print(ingredient)
         print('Altered Steps:')
         for step in self.steps:
             print(step)
@@ -306,6 +324,10 @@ def change_unit(unit, ingredient):
     return ingredient.name
 
 
+def change_method(method):
+    pass
+
+
 # healthy substitutions dictionaries
 
 healthy_substitutions_names = {
@@ -370,7 +392,7 @@ baking_healthy_substitutions_names = {
                               functools.partial(change_unit, 'cup')]},
     'flour': {'substitutions': [functools.partial(change_adjective, 'whole-wheat')]},
     'chocolate': {'substitutions': [functools.partial(change_name, 'nibs'),
-                                    functools.partial(change_adjective, 'cocoa')]},
+                                    functools.partial(change_adjective, 'cacao')]},
 }
 baking_healthy_substitutions_adjectives = {
     'peanut': {'substitutions': [functools.partial(change_adjective, 'almond')]}
@@ -382,6 +404,92 @@ baking_healthy_substitutions_exceptions = {
     'peanut butter': {'substitutions': [functools.partial(change_adjective, 'almond')]}
 }
 
+# unhealthy substitutions dictionaries
+unhealthy_substitutions_names = {
+    "applesauce": {"substitutions": [functools.partial(change_amount, 3)],
+                   "additions": [functools.partial(ingredient_delta, "shortening", "", "", 1)],
+                   "remove": None},
+    "oil": {"substitutions": [functools.partial(change_amount, 3)],
+               "additions": [functools.partial(ingredient_delta, "butter", "", "", 1)],
+               "remove": None},
+    "stevia": {"substitutions": [functools.partial(change_name, "sugar"),
+                                 functools.partial(change_amount, 2)]},
+    "salt": {"substitutions": [functools.partial(change_adjective, "table"),
+                               functools.partial(change_amount, 2)]},
+    "pasta": {"substitutions": [functools.partial(change_adjective, "")]},
+    "milk": {"substitutions": [functools.partial(change_adjective, "whole")]},
+    "cheese": {"substitutions": [functools.partial(change_amount, 2)]},
+    "eggs": {"substitutions": [functools.partial(change_adjective, ""),
+                              functools.partial(change_amount, 1),
+                              functools.partial(change_unit, "egg")]},
+    "quinoa": {"substitutions": [functools.partial(change_name, "rice"),
+                                 functools.partial(change_adjective, "white")]},
+    "flour": {"substitutions": [functools.partial(change_adjective, "")]},
+    "cacao": {"substitutions": [functools.partial(change_name, "chocolate"),
+                                    functools.partial(change_adjective, "")]},
+    "zoodles": {"additions": [functools.partial(ingredient_delta, "pasta", "", "", 1)],
+               "remove": None},
+    "flaxseed": {"additions": [functools.partial(ingredient_delta, "crumbs", "bread", "", 1)],
+               "remove": None},
+}
+
+unhealthy_substitutions_adjectives = {
+    "romaine": {"substitutions": [functools.partial(change_adjective, "iceberg")]},
+    "almond": {"substitutions": [functools.partial(change_adjective, "peanut")]},
+    "corn": {"substitutions": [functools.partial(change_adjective, "flour")]},
+    "fresh": {"substitutions": [functools.partial(change_adjective, "canned")]},
+}
+unhealthy_substitutions_categories = {
+    "vegetable": {"remove": None},
+}
+unhealthy_substitutions_exceptions = {
+    "greek yogurt": {"substitutions": [functools.partial(change_name, "sour"),
+                                       functools.partial(change_adjective, "cream")]},
+}
+
+unhealthy_substitutions_methods = {}
+
+# baking unhealthy substitutions dictionaries
+baking_unhealthy_substitutions_names = {
+    "applesauce": {"substitutions": [functools.partial(change_amount, 3)],
+                   "additions": [functools.partial(ingredient_delta, "shortening", "", "", 1)],
+                   "remove": None},
+    "oil": {"substitutions": [functools.partial(change_amount, 3)],
+               "additions": [functools.partial(ingredient_delta, "butter", "", "", 1)],
+               "remove": None},
+    "stevia": {"substitutions": [functools.partial(change_name, "sugar"),
+                                 functools.partial(change_amount, 2)]},
+    "salt": {"substitutions": [functools.partial(change_adjective, "table"),
+                               functools.partial(change_amount, 2)]},
+    "pasta": {"substitutions": [functools.partial(change_adjective, "")]},
+    "milk": {"substitutions": [functools.partial(change_adjective, "whole")]},
+    "cheese": {"substitutions": [functools.partial(change_amount, 2)]},
+    "egg": {"substitutions": [functools.partial(change_adjective, ""),
+                              functools.partial(change_amount, 1),
+                              functools.partial(change_unit, "egg")]},
+    "quinoa": {"substitutions": [functools.partial(change_name, "rice"),
+                                 functools.partial(change_adjective, "white")]},
+    "flour": {"substitutions": [functools.partial(change_adjective, "")]},
+    "cacao": {"substitutions": [functools.partial(change_name, "chocolate"),
+                                functools.partial(change_adjective, "")]},
+    "zoodles": {"additions": [functools.partial(ingredient_delta, "pasta", "", "", 1)],
+               "remove": None},
+    "flaxseed": {"additions": [functools.partial(ingredient_delta, "crumbs", "bread", "", 1)],
+               "remove": None},
+}
+baking_unhealthy_substitutions_adjectives = {
+    "romaine": {"substitutions": [functools.partial(change_adjective, "iceberg")]},
+    "almond": {"substitutions": [functools.partial(change_adjective, "peanut")]},
+    "corn": {"substitutions": [functools.partial(change_adjective, "flour")]},
+    "fresh": {"substitutions": [functools.partial(change_adjective, "canned")]}
+}
+baking_unhealthy_substitutions_categories = {
+    "vegetable": {"remove": None}
+}
+baking_unhealthy_substitutions_exceptions = {
+    "greek yogurt": {"substitutions": [functools.partial(change_name, "sour"),
+                                       functools.partial(change_adjective, "cream")]}
+}
 
 # vegetarian substitutions dictionaries
 
@@ -401,6 +509,18 @@ vegetarian_substitutions_adjectives = {
 }
 vegetarian_substitutions_categories = {}
 vegetarian_substitutions_exceptions = {}
+
+# unvegetarian substitutions dictionaries
+
+unvegetarian_substitutions_names = {
+    "eggplant": {"substitutions": [functools.partial(change_name, "chicken"),
+                                   functools.partial(change_adjective, "fried")]},
+    "tofu": {"substitutions": [functools.partial(change_name, "pork")]},
+    "lentils": {"substitutions": [functools.partial(change_name, "beef")]},
+    "mushroom": {"substitutions": [functools.partial(change_name, "steak"),
+                                functools.partial(change_adjective, "")]},
+    "seitan": {"substitutions": [functools.partial(change_adjective, "bacon")]},
+}
 
 
 # thai substitutions dictionaries
@@ -556,8 +676,89 @@ def make_healthy_substitutions(ingredients, ingredient_switches, bake):
     ingredients += added_ingredients
 
 
-def make_unhealthy_substitutions(ingredients, ingredient_switches, bake):
-    pass
+def make_unhealthy_substitutions(ingredients, ingredient_switches, bake, steps):
+    global unhealthy_substitutions_names
+    global unhealthy_substitutions_adjectives
+    global unhealthy_substitutions_categories
+    global unhealthy_substitutions_exceptions
+    global baking_unhealthy_substitutions_names
+    global baking_unhealthy_substitutions_adjectives
+    global baking_unhealthy_substitutions_categories
+    global baking_unhealthy_substitutions_exceptions
+    added_ingredients = []
+    removed_ingredients = []
+    # loop through ingredients and make substitutions
+    for ingredient in ingredients:
+        full_name = ingredient.name
+        if ingredient.adjective:
+            full_name = ingredient.adjective + ' ' + full_name
+        if bake is True:
+            if full_name in baking_unhealthy_substitutions_exceptions:
+                removed, new_name = make_substitutions(ingredient,
+                                                       baking_unhealthy_substitutions_exceptions[full_name],
+                                                       added_ingredients)
+                ingredient_switches[ingredient.name] = new_name
+                continue
+            if ingredient.name in baking_unhealthy_substitutions_names:
+                removed, new_name = make_substitutions(ingredient,
+                                                       baking_unhealthy_substitutions_names[ingredient.name],
+                                                       added_ingredients)
+                ingredient_switches[ingredient.name] = new_name
+                if removed:
+                    removed_ingredients.append(ingredient)
+                    continue
+            if ingredient.adjective in baking_unhealthy_substitutions_adjectives:
+                removed, new_name = make_substitutions(ingredient,
+                                                       baking_unhealthy_substitutions_adjectives[ingredient.adjective],
+                                                       added_ingredients)
+                ingredient_switches[ingredient.name] = new_name
+                if removed:
+                    removed_ingredients.append(ingredient)
+                    continue
+            if ingredient.category in baking_unhealthy_substitutions_categories:
+                removed, new_name = make_substitutions(ingredient,
+                                                       baking_unhealthy_substitutions_categories[ingredient.category],
+                                                       added_ingredients)
+                ingredient_switches[ingredient.name] = new_name
+                if removed:
+                    removed_ingredients.append(ingredient)
+                    continue
+
+        else:
+            if full_name in unhealthy_substitutions_exceptions:
+                removed, new_name = make_substitutions(ingredient,
+                                                       unhealthy_substitutions_exceptions[full_name],
+                                                       added_ingredients)
+                ingredient_switches[ingredient.name] = new_name
+                continue
+            if ingredient.name in unhealthy_substitutions_names:
+                removed, new_name = make_substitutions(ingredient,
+                                                       unhealthy_substitutions_names[ingredient.name],
+                                                       added_ingredients)
+                ingredient_switches[ingredient.name] = new_name
+                if removed:
+                    removed_ingredients.append(ingredient)
+                    continue
+            if ingredient.adjective in unhealthy_substitutions_adjectives:
+                removed, new_name = make_substitutions(ingredient,
+                                                       unhealthy_substitutions_adjectives[ingredient.adjective],
+                                                       added_ingredients)
+                ingredient_switches[ingredient.name] = new_name
+                if removed:
+                    removed_ingredients.append(ingredient)
+                    continue
+            if ingredient.category in unhealthy_substitutions_categories:
+                removed, new_name = make_substitutions(ingredient,
+                                                       unhealthy_substitutions_categories[ingredient.category],
+                                                       added_ingredients)
+                ingredient_switches[ingredient.name] = new_name
+                if removed:
+                    removed_ingredients.append(ingredient)
+                    continue
+
+    for ingredient in removed_ingredients:
+        ingredients.remove(ingredient)
+    ingredients += added_ingredients
 
 
 def make_vegetarian_substitutions(ingredients, ingredient_switches):
@@ -607,11 +808,70 @@ def make_vegetarian_substitutions(ingredients, ingredient_switches):
 
 
 def make_non_vegetarian_substitutions(ingredients, ingredient_switches):
-    pass
+    global unvegetarian_substitutions_names
+    added_ingredients = []
+    removed_ingredients = []
+    for ingredient in ingredients:
+        full_name = ingredient.name
+        if ingredient.adjective:
+            full_name = ingredient.adjective + ' ' + full_name
+        if ingredient.name in unvegetarian_substitutions_names:
+            removed, new_name = make_substitutions(ingredient,
+                                                   unvegetarian_substitutions_names[ingredient.name],
+                                                   added_ingredients)
+            ingredient_switches[ingredient.name] = new_name
+            if removed:
+                removed_ingredients.append(ingredient)
+                continue
+    for ingredient in removed_ingredients:
+        ingredients.remove(ingredient)
+    ingredients += added_ingredients
 
 
 def make_thai_substitutions(ingredients, ingredient_switches):
-    pass
+    global thai_substitutions_names
+    global thai_substitutions_adjectives
+    global thai_substitutions_categories
+    global thai_substitutions_exceptions
+    added_ingredients = []
+    removed_ingredients = []
+    for ingredient in ingredients:
+        full_name = ingredient.name
+        if ingredient.adjective:
+            full_name = ingredient.adjective + ' ' + full_name
+        if full_name in thai_substitutions_exceptions:
+            removed, new_name = make_substitutions(ingredient,
+                                                   thai_substitutions_exceptions[full_name],
+                                                   added_ingredients)
+            ingredient_switches[ingredient.name] = new_name
+            continue
+        if ingredient.name in thai_substitutions_names:
+            removed, new_name = make_substitutions(ingredient,
+                                                   thai_substitutions_names[ingredient.name],
+                                                   added_ingredients)
+            ingredient_switches[ingredient.name] = new_name
+            if removed:
+                removed_ingredients.append(ingredient)
+                continue
+        if ingredient.adjective in thai_substitutions_adjectives:
+            removed, new_name = make_substitutions(ingredient,
+                                                   thai_substitutions_adjectives[ingredient.adjective],
+                                                   added_ingredients)
+            ingredient_switches[ingredient.name] = new_name
+            if removed:
+                removed_ingredients.append(ingredient)
+                continue
+        if ingredient.category in thai_substitutions_categories:
+            removed, new_name = make_substitutions(ingredient,
+                                                   thai_substitutions_categories[ingredient.category],
+                                                   added_ingredients)
+            ingredient_switches[ingredient.name] = new_name
+            if removed:
+                removed_ingredients.append(ingredient)
+                continue
+    for ingredient in removed_ingredients:
+        ingredients.remove(ingredient)
+    ingredients += added_ingredients
 
 
 def make_substitutions(ingredient, substitutions, added_ingredients):
@@ -634,7 +894,8 @@ if __name__ == '__main__':
     # url = input('Please provide a recipe URL: ')
     html = urllib.request.urlopen(url)
     recipe = Recipe(url)
-    transformation = input("How would you like to transform your recipe? Type 'healthy', 'unhealthy', 'vegetarian', 'meatify', or 'thai'")
+    transformation = input(
+        "How would you like to transform your recipe? Type 'healthy', 'unhealthy', 'vegetarian', 'meatify', or 'thai'")
     if transformation == 'healthy':
         recipe.make_healthy()
     elif transformation == 'unhealthy':
