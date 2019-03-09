@@ -447,6 +447,8 @@ unhealthy_substitutions_exceptions = {
                                        functools.partial(change_adjective, "cream")]},
 }
 
+unhealthy_substitutions_methods = {}
+
 # baking unhealthy substitutions dictionaries
 baking_unhealthy_substitutions_names = {
     "applesauce": {"substitutions": [functools.partial(change_amount, 3)],
