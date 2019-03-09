@@ -415,8 +415,16 @@ thai_substitutions_names = {
                                 functools.partial(change_name, 'noodles')]},
     'noodles': {'substitutions': [functools.partial(change_adjective, 'rice')]},
     'milk': {'substitutions': [functools.partial(change_adjective, 'coconut')]},
+    'cream': {'substitutions': [functools.partial(change_adjective, 'coconut'),
+                                functools.partial(change_name, 'milk')]},
     'onions': {'substitutions': [functools.partial(change_name, 'shallots')]},
+    'onion': {'substitutions': [functools.partial(change_name, 'shallot')]},
     'basil': {'substitutions': [functools.partial(change_adjective, 'thai')]},
+    'sugar': {'substitutions': [functools.partial(change_adjective, 'palm')]},
+    'apple': {'substitutions': [functools.partial(change_name, 'mango'),
+                                functools.partial(change_adjective, 'green')]},
+    'turnip': {'substitutions': [functools.partial(change_name, 'radish'),
+                                functools.partial(change_adjective, 'white')]},
 }
 thai_substitutions_adjectives = {
     'whole-wheat': {'substitutions': [functools.partial(change_adjective, 'rice')]}
@@ -425,7 +433,12 @@ thai_substitutions_categories = {
     'sauce': {'substitutions': [functools.partial(change_adjective, 'thai'),
                                 functools.partial(change_name, 'curry paste')]}
 }
-thai_substitutions_exceptions = {}
+thai_substitutions_exceptions = {
+    'soy sauce': [functools.partial(change_name, 'fish sauce'),
+                  functools.partial(change_adjective, 'thai')],
+    'lemon zest': [functools.partial(change_name, 'lemongrass')],
+    'large onion': {'substitutions': [functools.partial(change_name, 'shallots')]},
+}
 
 
 # helper functions
@@ -621,4 +634,16 @@ if __name__ == '__main__':
     # url = input('Please provide a recipe URL: ')
     html = urllib.request.urlopen(url)
     recipe = Recipe(url)
-    recipe.make_healthy()
+    transformation = input("How would you like to transform your recipe? Type 'healthy', 'unhealthy', 'vegetarian', 'meatify', or 'thai'")
+    if transformation == 'healthy':
+        recipe.make_healthy()
+    elif transformation == 'unhealthy':
+        recipe.make_unhealthy()
+    elif transformation == 'vegetarian':
+        recipe.make_vegetarian()
+    elif transformation == 'meatify':
+        recipe.make_non_vegetarian()
+    elif transformation == 'thai':
+        recipe.make_thai()
+    else:
+        print("Invalid Input")
