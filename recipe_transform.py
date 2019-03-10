@@ -900,7 +900,7 @@ def protein_base(text):
         return False
     elif 'pork' in text:
         return 'pork'
-    elif 'beef' in text:
+    elif ('beef' or 'steak') in text:
         return 'beef'
     elif 'chicken' in text:
         return 'chicken'
