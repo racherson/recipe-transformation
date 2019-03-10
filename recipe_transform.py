@@ -776,6 +776,8 @@ def make_vegetarian_substitutions(ingredients, ingredient_switches):
     removed_ingredients = []
     for ingredient in ingredients:
         full_name = ingredient.name
+        if protein_base(full_name):
+            full_name = protein_base(full_name)
         if ingredient.adjective:
             full_name = ingredient.adjective + ' ' + full_name
         if full_name in vegetarian_substitutions_exceptions:
