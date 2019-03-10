@@ -630,11 +630,19 @@ def make_healthy_substitutions(ingredients, ingredient_switches, bake):
                                                        added_ingredients)
                 ingredient_switches[ingredient.name] = new_name
                 continue
-            if ingredient.name in baking_healthy_substitutions_names or protein_base(ingredient.name) in baking_healthy_substitutions_names:
+            if ingredient.name in baking_healthy_substitutions_names:
                 removed, new_name = make_substitutions(ingredient,
                                                        baking_healthy_substitutions_names[ingredient.name],
                                                        added_ingredients)
                 ingredient_switches[ingredient.name] = new_name
+                if removed:
+                    removed_ingredients.append(ingredient)
+                    continue
+            if protein_base(ingredient.name) in baking_healthy_substitutions_names:
+                removed, new_name = make_substitutions(ingredient,
+                                                       baking_healthy_substitutions_names[protein_base(ingredient.name)],
+                                                       added_ingredients)
+                ingredient_switches[protein_base(ingredient.name)] = new_name
                 if removed:
                     removed_ingredients.append(ingredient)
                     continue
@@ -661,11 +669,19 @@ def make_healthy_substitutions(ingredients, ingredient_switches, bake):
                                                        added_ingredients)
                 ingredient_switches[ingredient.name] = new_name
                 continue
-            if ingredient.name in healthy_substitutions_names or protein_base(ingredient.name) in healthy_substitutions_names:
+            if ingredient.name in healthy_substitutions_names:
                 removed, new_name = make_substitutions(ingredient,
                                                        healthy_substitutions_names[ingredient.name],
                                                        added_ingredients)
                 ingredient_switches[ingredient.name] = new_name
+                if removed:
+                    removed_ingredients.append(ingredient)
+                    continue
+            if protein_base(ingredient.name) in healthy_substitutions_names:
+                removed, new_name = make_substitutions(ingredient,
+                                                       healthy_substitutions_names[protein_base(ingredient.name)],
+                                                       added_ingredients)
+                ingredient_switches[protein_base(ingredient.name)] = new_name
                 if removed:
                     removed_ingredients.append(ingredient)
                     continue
@@ -713,11 +729,19 @@ def make_unhealthy_substitutions(ingredients, ingredient_switches, bake, steps):
                                                        added_ingredients)
                 ingredient_switches[ingredient.name] = new_name
                 continue
-            if ingredient.name in baking_unhealthy_substitutions_names or protein_base(ingredient.name) in baking_unhealthy_substitutions_names:
+            if ingredient.name in baking_unhealthy_substitutions_names:
                 removed, new_name = make_substitutions(ingredient,
                                                        baking_unhealthy_substitutions_names[ingredient.name],
                                                        added_ingredients)
                 ingredient_switches[ingredient.name] = new_name
+                if removed:
+                    removed_ingredients.append(ingredient)
+                    continue
+            if protein_base(ingredient.name) in baking_unhealthy_substitutions_names:
+                removed, new_name = make_substitutions(ingredient,
+                                                       baking_unhealthy_substitutions_names[protein_base(ingredient.name)],
+                                                       added_ingredients)
+                ingredient_switches[protein_base(ingredient.name)] = new_name
                 if removed:
                     removed_ingredients.append(ingredient)
                     continue
@@ -745,11 +769,19 @@ def make_unhealthy_substitutions(ingredients, ingredient_switches, bake, steps):
                                                        added_ingredients)
                 ingredient_switches[ingredient.name] = new_name
                 continue
-            if ingredient.name in unhealthy_substitutions_names or protein_base(ingredient.name) in unhealthy_substitutions_names:
+            if ingredient.name in unhealthy_substitutions_names:
                 removed, new_name = make_substitutions(ingredient,
                                                        unhealthy_substitutions_names[ingredient.name],
                                                        added_ingredients)
                 ingredient_switches[ingredient.name] = new_name
+                if removed:
+                    removed_ingredients.append(ingredient)
+                    continue
+            if protein_base(ingredient.name) in unhealthy_substitutions_names:
+                removed, new_name = make_substitutions(ingredient,
+                                                       unhealthy_substitutions_names[protein_base(ingredient.name)],
+                                                       added_ingredients)
+                ingredient_switches[protein_base(ingredient.name)] = new_name
                 if removed:
                     removed_ingredients.append(ingredient)
                     continue
@@ -794,11 +826,19 @@ def make_vegetarian_substitutions(ingredients, ingredient_switches):
                                                    added_ingredients)
             ingredient_switches[ingredient.name] = new_name
             continue
-        if ingredient.name in vegetarian_substitutions_names or protein_base(ingredient.name) in vegetarian_substitutions_names:
+        if ingredient.name in vegetarian_substitutions_names:
             removed, new_name = make_substitutions(ingredient,
                                                    vegetarian_substitutions_names[ingredient.name],
                                                    added_ingredients)
             ingredient_switches[ingredient.name] = new_name
+            if removed:
+                removed_ingredients.append(ingredient)
+                continue
+        if protein_base(ingredient.name) in vegetarian_substitutions_names:
+            removed, new_name = make_substitutions(ingredient,
+                                                   vegetarian_substitutions_names[protein_base(ingredient.name)],
+                                                   added_ingredients)
+            ingredient_switches[protein_base(ingredient.name)] = new_name
             if removed:
                 removed_ingredients.append(ingredient)
                 continue
@@ -831,11 +871,19 @@ def make_non_vegetarian_substitutions(ingredients, ingredient_switches):
         full_name = ingredient.name
         if ingredient.adjective:
             full_name = ingredient.adjective + ' ' + full_name
-        if ingredient.name in unvegetarian_substitutions_names or protein_base(ingredient.name) in unvegetarian_substitutions_names:
+        if ingredient.name in unvegetarian_substitutions_names:
             removed, new_name = make_substitutions(ingredient,
                                                    unvegetarian_substitutions_names[ingredient.name],
                                                    added_ingredients)
             ingredient_switches[ingredient.name] = new_name
+            if removed:
+                removed_ingredients.append(ingredient)
+                continue
+        if protein_base(ingredient.name) in unvegetarian_substitutions_names:
+            removed, new_name = make_substitutions(ingredient,
+                                                   unvegetarian_substitutions_names[protein_base(ingredient.name)],
+                                                   added_ingredients)
+            ingredient_switches[protein_base(ingredient.name)] = new_name
             if removed:
                 removed_ingredients.append(ingredient)
                 continue
