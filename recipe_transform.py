@@ -7,7 +7,6 @@ import urllib.request
 from bs4 import BeautifulSoup
 from pprint import pprint
 
-
 # TODOs
 
 # TODO: merge ingredients if they are in same step
@@ -500,15 +499,22 @@ vegetarian_substitutions_names = {
     'steak': {'substitutions': [functools.partial(change_name, 'mushroom'),
                                 functools.partial(change_adjective, 'portobello')]},
     'bacon': {'substitutions': [functools.partial(change_adjective, 'seitan')]},
-    'fish': {'substitutions': [functools.partial(change_name, 'tofu')]}
+    'fish': {'substitutions': [functools.partial(change_name, 'tofu')]},
+    'broth': {'substitutions': [functools.partial(change_adjective, 'vegetable')]},
+    'stock': {'substitutions': [functools.partial(change_adjective, 'vegetable')]}
 }
-vegetarian_substitutions_adjectives = {
-    'chicken': {'substitutions': [functools.partial(change_adjective, 'vegetable')]},
-    'pork': {'substitutions': [functools.partial(change_adjective, 'vegetable')]},
-    'beef': {'substitutions': [functools.partial(change_adjective, 'vegetable')]},
-}
+vegetarian_substitutions_adjectives = {}
 vegetarian_substitutions_categories = {}
-vegetarian_substitutions_exceptions = {}
+vegetarian_substitutions_exceptions = {
+    'chicken stock': {'substitutions': [functools.partial(change_name, "stock"),
+                                        functools.partial(change_adjective, 'vegetable')]},
+    'pork stock': {'substitutions': [functools.partial(change_name, "stock"),
+                                     functools.partial(change_adjective, 'vegetable')]},
+    'beef stock': {'substitutions': [functools.partial(change_name, "stock"),
+                                     functools.partial(change_adjective, 'vegetable')]},
+    'fish stock': {'substitutions': [functools.partial(change_name, "stock"),
+                                     functools.partial(change_adjective, 'vegetable')]},
+}
 
 # unvegetarian substitutions dictionaries
 
@@ -889,13 +895,28 @@ def make_substitutions(ingredient, substitutions, added_ingredients):
     return False, new_name
 
 
+def protein_base(text):
+    if 'stock' in text or 'broth' in text:
+        return False
+    elif 'pork' in text:
+        return 'pork'
+    elif 'beef' in text:
+        return 'beef'
+    elif 'chicken' in text:
+        return 'chicken'
+    elif ('salmon' or 'fish' or 'halibut' or 'tuna' or 'catfish' or 'talapia') in text:
+        return 'fish'
+    else:
+        return False
+
+
 if __name__ == '__main__':
-    url = 'https://www.allrecipes.com/recipe/173906/cajun-roasted-pork-loin/'
-    # url = input('Please provide a recipe URL: ')
+    # url = 'https://www.allrecipes.com/recipe/173906/cajun-roasted-pork-loin/'
+    url = input('Please provide a recipe URL: ')
     html = urllib.request.urlopen(url)
     recipe = Recipe(url)
     transformation = input(
-        "How would you like to transform your recipe? Type 'healthy', 'unhealthy', 'vegetarian', 'meatify', or 'thai'")
+        "How would you like to transform your recipe? Type 'healthy', 'unhealthy', 'vegetarian', 'meatify', or 'thai'\n")
     if transformation == 'healthy':
         recipe.make_healthy()
     elif transformation == 'unhealthy':
