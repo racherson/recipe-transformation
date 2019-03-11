@@ -864,6 +864,8 @@ thai_substitutions_exceptions = {
 # mediterranean substitutions dictionaries
 
 mediterranean_substitutions_names = {
+    'broth': {'substitutions': [functools.partial(change_adjective, 'vegetable'),
+                                functools.partial(change_category, 'broth')]},
     'tofu': {'substitutions': [functools.partial(change_name, 'fish'),
                                functools.partial(change_category, 'meat')]},
     'butter': {'substitutions': [functools.partial(change_name, 'olive oil'),
@@ -879,6 +881,7 @@ mediterranean_substitutions_names = {
                                functools.partial(change_category, 'healthy_grains')]},
     'pasta': {'substitutions': [functools.partial(change_adjective, 'whole-wheat'),
                                 functools.partial(change_category, 'healthy_grains')]},
+    'flour': {'substitutions': [functools.partial(change_adjective, 'whole-wheat')]},
 }
 mediterranean_substitutions_adjectives = {}
 mediterranean_substitutions_categories = {
@@ -893,7 +896,7 @@ mediterranean_substitutions_categories = {
                                   functools.partial(change_adjective, None)]},
     'turkey': {'substitutions': [functools.partial(change_name, 'beans'),
                                  functools.partial(change_adjective, None)]},
-    'pork': {'substitutions': [functools.partial(change_name, 'trout'),
+    'pork': {'substitutions': [functools.partial(change_name, 'bass'),
                                functools.partial(change_adjective, None)]},
     'bacon': {'substitutions': [functools.partial(change_name, 'salmon'),
                                 functools.partial(change_adjective, None)]},
