@@ -11,7 +11,6 @@ from bs4 import BeautifulSoup
 # TODOs
 
 # TODO: comment code since there is no more presentation
-# TODO: set ingredient category in add_ingredient
 # TODO: include ingredient style
 # TODO: change unit when changing amount across 1 (use inflect)
 # TODO: check units when merging ingredients
@@ -150,6 +149,9 @@ class Recipe:
             for switch in self.ingredient_switches:
                 for word_end in word_ends:
                     step.text = step.text.replace(switch + word_end, self.ingredient_switches[switch] + word_end)
+            for switch in self.method_switches:
+                for word_end in word_ends:
+                    step.text = step.text.replace(switch + word_end, self.method_switches[switch] + word_end)
 
         # global PUNCTUATION
         # for step in self.steps:
@@ -175,6 +177,7 @@ class Recipe:
             global healthy_baking_substitutions_adjectives
             global healthy_baking_substitutions_categories
             global healthy_baking_substitutions_exceptions
+            global healthy_baking_substitutions_methods
             for step in self.steps:
                 make_substitutions_with(step.ingredients,
                                         self.ingredient_switches,
@@ -183,11 +186,16 @@ class Recipe:
                                         healthy_baking_substitutions_categories,
                                         healthy_baking_substitutions_exceptions,
                                         False)
+                for method in step.methods:
+                    if method in healthy_baking_substitutions_methods:
+                        self.method_switches[method] = healthy_baking_substitutions_methods[method]
+                step.methods = [self.method_switches[x] if x in self.method_switches else x for x in step.methods]
         else:
             global healthy_substitutions_names
             global healthy_substitutions_adjectives
             global healthy_substitutions_categories
             global healthy_substitutions_exceptions
+            global healthy_substitutions_methods
             for step in self.steps:
                 make_substitutions_with(step.ingredients,
                                         self.ingredient_switches,
@@ -196,6 +204,10 @@ class Recipe:
                                         healthy_substitutions_categories,
                                         healthy_substitutions_exceptions,
                                         False)
+                for method in step.methods:
+                    if method in healthy_substitutions_methods:
+                        self.method_switches[method] = healthy_substitutions_methods[method]
+                step.methods = [self.method_switches[x] if x in self.method_switches else x for x in step.methods]
         self.alter_steps()
         print('\nAltered Steps:')
         for step in self.steps:
@@ -208,6 +220,7 @@ class Recipe:
             global unhealthy_baking_substitutions_adjectives
             global unhealthy_baking_substitutions_categories
             global unhealthy_baking_substitutions_exceptions
+            global unhealthy_baking_substitutions_methods
             for step in self.steps:
                 make_substitutions_with(step.ingredients,
                                         self.ingredient_switches,
@@ -216,11 +229,16 @@ class Recipe:
                                         unhealthy_baking_substitutions_categories,
                                         unhealthy_baking_substitutions_exceptions,
                                         False)
+                for method in step.methods:
+                    if method in unhealthy_baking_substitutions_methods:
+                        self.method_switches[method] = unhealthy_baking_substitutions_methods[method]
+                step.methods = [self.method_switches[x] if x in self.method_switches else x for x in step.methods]
         else:
             global unhealthy_substitutions_names
             global unhealthy_substitutions_adjectives
             global unhealthy_substitutions_categories
             global unhealthy_substitutions_exceptions
+            global unhealthy_substitutions_methods
             for step in self.steps:
                 make_substitutions_with(step.ingredients,
                                         self.ingredient_switches,
@@ -229,6 +247,10 @@ class Recipe:
                                         unhealthy_substitutions_categories,
                                         unhealthy_substitutions_exceptions,
                                         False)
+                for method in step.methods:
+                    if method in unhealthy_substitutions_methods:
+                        self.method_switches[method] = unhealthy_substitutions_methods[method]
+                step.methods = [self.method_switches[x] if x in self.method_switches else x for x in step.methods]
         self.alter_steps()
         next_count = int(self.steps[-1].text[0]) + 1
         if not self.bake:
@@ -523,6 +545,9 @@ healthy_substitutions_exceptions = {
     'sour cream': {'substitutions': [functools.partial(change_name, 'yogurt'),
                                      functools.partial(change_adjective, 'greek')]},
 }
+healthy_substitutions_methods = {
+    'fry': 'saute'
+}
 
 
 # healthy baking substitutions dictionaries
@@ -561,6 +586,9 @@ healthy_baking_substitutions_categories = {
 }
 healthy_baking_substitutions_exceptions = {
     'peanut butter': {'substitutions': [functools.partial(change_adjective, 'almond')]},
+}
+healthy_baking_substitutions_methods = {
+    'fry': 'bake'
 }
 
 
@@ -607,6 +635,14 @@ unhealthy_substitutions_exceptions = {
     'greek yogurt': {'substitutions': [functools.partial(change_name, 'sour'),
                                        functools.partial(change_adjective, 'cream')]},
 }
+unhealthy_substitutions_methods = {
+    'saute': 'fry',
+    'sauté': 'fry',
+    'steam': 'fry',
+    'grill': 'fry',
+    'roast': 'fry',
+    'bake': 'fry'
+}
 
 
 # unhealthy baking substitutions dictionaries
@@ -651,6 +687,13 @@ unhealthy_baking_substitutions_categories = {
 unhealthy_baking_substitutions_exceptions = {
     'greek yogurt': {'substitutions': [functools.partial(change_name, 'sour'),
                                        functools.partial(change_adjective, 'cream')]},
+}
+unhealthy_baking_substitutions_methods = {
+    'saute': 'fry',
+    'sauté': 'fry',
+    'steam': 'fry',
+    'grill': 'fry',
+    'roast': 'fry'
 }
 
 
@@ -1013,8 +1056,8 @@ if __name__ == '__main__':
     while True:
         # url = input('Please provide a recipe URL: ')
 
-        # url = 'https://www.allrecipes.com/recipe/173906/cajun-roasted-pork-loin/'
-        url = 'https://www.allrecipes.com/recipe/269944/shrimp-and-smoked-sausage-jambalaya/'
+        url = 'https://www.allrecipes.com/recipe/173906/cajun-roasted-pork-loin/'
+        # url = 'https://www.allrecipes.com/recipe/269944/shrimp-and-smoked-sausage-jambalaya/'
 
         if len(url) > 40 and url[:34] == 'https://www.allrecipes.com/recipe/':
             try:
@@ -1029,7 +1072,7 @@ if __name__ == '__main__':
     while True:
         # transformation = input('\nHow would you like to transform your recipe? Type "healthy", "unhealthy", "vegetarian", "meatify", "mediterranean", or "thai": ')
 
-        transformation = 'vegetarian'
+        transformation = 'unhealthy'
 
         if transformation == 'healthy':
             recipe.make_healthy()
