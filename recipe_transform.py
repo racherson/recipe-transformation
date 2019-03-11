@@ -864,13 +864,8 @@ thai_substitutions_exceptions = {
 # mediterranean substitutions dictionaries
 
 mediterranean_substitutions_names = {
-    'beef': {'substitutions': [functools.partial(change_name, 'salmon')]},
-    'chicken': {'substitutions': [functools.partial(change_name, 'tuna')]},
-    'turkey': {'substitutions': [functools.partial(change_name, 'beans')]},
     'tofu': {'substitutions': [functools.partial(change_name, 'fish'),
                                functools.partial(change_category, 'meat')]},
-    'bacon': {'substitutions': [functools.partial(change_name, 'salmon')]},
-    'sausage': {'substitutions': [functools.partial(change_name, 'lentils')]},
     'butter': {'substitutions': [functools.partial(change_name, 'olive oil'),
                                  functools.partial(change_category, 'healthy_fats')]},
     'soybean oil': {'substitutions': [functools.partial(change_name, 'sesame oil')]},
@@ -892,6 +887,17 @@ mediterranean_substitutions_categories = {
     'unhealthy_dairy': {'substitutions': [functools.partial(change_name, 'yogurt'),
                                           functools.partial(change_adjective, 'greek'),
                                           functools.partial(change_category, 'healthy_dairy')]},
+    'beef': {'substitutions': [functools.partial(change_name, 'salmon'),
+                               functools.partial(change_adjective, None)]},
+    'chicken': {'substitutions': [functools.partial(change_name, 'tuna'),
+                                  functools.partial(change_adjective, None)]},
+    'turkey': {'substitutions': [functools.partial(change_name, 'beans'),
+                                 functools.partial(change_adjective, None)]},
+    'pork': {'substitutions': [functools.partial(change_name, 'trout'),
+                               functools.partial(change_adjective, None)]},
+    'bacon': {'substitutions': [functools.partial(change_name, 'salmon'),
+                                functools.partial(change_adjective, None)]},
+    'sausage': {'substitutions': [functools.partial(change_name, 'lentils')]},
 }
 mediterranean_substitutions_exceptions = {}
 
@@ -1072,7 +1078,7 @@ if __name__ == '__main__':
     while True:
         # transformation = input('\nHow would you like to transform your recipe? Type "healthy", "unhealthy", "vegetarian", "meatify", "mediterranean", or "thai": ')
 
-        transformation = 'unhealthy'
+        transformation = 'mediterranean'
 
         if transformation == 'healthy':
             recipe.make_healthy()
