@@ -852,6 +852,10 @@ def add_ingredient(ingredient_text):
         if meat in full_name:
             category = meat
 
+    for key,val in INGREDIENT_CATEGORIES.items():
+        if (full_name in val or name in val) and category is None:
+            category = key
+
     print('\ningred amt:', str(amount))
     print('ingred unit:', unit)
     print('ingred adj:', adjective)
