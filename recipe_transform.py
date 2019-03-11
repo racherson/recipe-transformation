@@ -15,6 +15,7 @@ from pprint import pprint
 # TODO: set ingredient category in add_ingredient
 # TODO: lemmatize when parsing steps for methods so tense is taken into consideration
 # TODO: parametrize substitution functions with dictionary arguments for less code repetition
+# TODO: broth == stock
 
 
 # global variables
@@ -228,33 +229,26 @@ class Step:
         self.text = step_text
         self.ingredients = []
         self.methods = None
-        # for ingredient in ingredients:
-        #     full_name = ingredient.name
-        #     if ingredient.adjective:
-        #         full_name = ingredient.adjective + ' ' + full_name
-        #     if full_name in step_text.lower():
-        #         self.ingredients.append(ingredient)
-
         ingredients_dict = {}
         for ingredient in ingredients:
             if ingredient.name in ingredients_dict:
                 ingredients_dict[ingredient.name].append(ingredient)
             else:
                 ingredients_dict[ingredient.name] = [ingredient]
-        unique_ingredients = {}
+        unique_ingredients_dict = {}
         for ingredient in ingredients_dict:
             if len(ingredients_dict[ingredient]) == 1:
-                unique_ingredients[ingredient] = ingredients_dict[ingredient][0]
+                unique_ingredients_dict[ingredient] = ingredients_dict[ingredient][0]
             else:
                 for ingredient_ref in ingredients_dict[ingredient]:
                     if ingredient_ref.adjective:
                         full_name = ingredient_ref.adjective + ' ' + ingredient
-                        unique_ingredients[full_name] = ingredient_ref
+                        unique_ingredients_dict[full_name] = ingredient_ref
                     else:
-                        unique_ingredients[ingredient] = ingredient_ref
-        for ingredient in unique_ingredients:
+                        unique_ingredients_dict[ingredient] = ingredient_ref
+        for ingredient in unique_ingredients_dict:
             if ingredient in step_text.lower():
-                self.ingredients.append(unique_ingredients[ingredient])
+                self.ingredients.append(unique_ingredients_dict[ingredient])
 
     def __str__(self):
         # return self.text
@@ -1004,10 +998,13 @@ def protein_base(text):
 
 if __name__ == '__main__':
     # url = 'https://www.allrecipes.com/recipe/173906/cajun-roasted-pork-loin/'
+
     url = input('Please provide a recipe URL: ')
     html = urllib.request.urlopen(url)
     recipe = Recipe(url)
-    transformation = 'healthy'
+
+    # transformation = 'healthy'
+
     transformation = input(
         "How would you like to transform your recipe? Type 'healthy', 'unhealthy', 'vegetarian', 'meatify', or 'thai'\n")
     if transformation == 'healthy':
