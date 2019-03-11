@@ -59,10 +59,10 @@ INGREDIENT_CATEGORIES = {
                        'brown rice syrup' 'stevia', 'honey', 'maple syrup', 'agave syrup', 'coconut sugar',
                        'date sugar', 'sugar alcohols', 'brown sugar'],
     'unhealthy_sugars': ['aspartame', 'acesulfame K', 'sucralose', 'white sugar', 'corn syrup', 'chocolate syrup'],
-    'spice': ['ajwain', 'allspice', 'almond meal', 'anise seed', 'annatto seed', 'arrowroot powder', 'cacao',
+    'spice': ['ajwain', 'allspice', 'almond meal', 'anise seed', 'annatto seed', 'arrowroot powder', 'cacao', 'cumin',
               'bell pepper', 'beetroot powder', 'chia seeds', 'cloves', 'chiles', 'cinnamon', 'cloves', 'coriander',
               'dill seed', 'garlic', 'ginger', 'mustard', 'onion', 'paprika', 'cayenne', 'pepper', 'red pepper',
-              'shallots', 'star anise', 'turmeric', 'vanilla extract'],
+              'black pepper', 'shallots', 'star anise', 'turmeric', 'vanilla extract'],
     'herb': ['basil', 'bay leaves', 'celery flakes', 'chervil', 'cilantro', 'curry', 'dill weed', 'dried chives',
              'epatoze', 'file powder', 'kaffire lime', 'lavender', 'lemongrass', 'mint', 'oregano', 'parsley',
              'rosemary', 'sage', 'tarragon', 'thyme']
@@ -303,6 +303,25 @@ class Recipe:
                                     thai_substitutions_adjectives,
                                     thai_substitutions_categories,
                                     thai_substitutions_exceptions,
+                                    False)
+        self.alter_steps()
+        print('\nAltered Steps:')
+        for step in self.steps:
+            print(step)
+
+    def make_mediterranean(self):
+        global mediterranean_substitutions_names
+        global mediterranean_substitutions_adjectives
+        global mediterranean_substitutions_categories
+        global mediterranean_substitutions_exceptions
+        print('\nMaking Mediterranean...')
+        for step in self.steps:
+            make_substitutions_with(step.ingredients,
+                                    self.ingredient_switches,
+                                    mediterranean_substitutions_names,
+                                    mediterranean_substitutions_adjectives,
+                                    mediterranean_substitutions_categories,
+                                    mediterranean_substitutions_exceptions,
                                     False)
         self.alter_steps()
         print('\nAltered Steps:')
@@ -742,12 +761,19 @@ vegetarian_substitutions_exceptions = {}
 
 non_vegetarian_substitutions_names = {
     'eggplant': {'substitutions': [functools.partial(change_name, 'chicken'),
-                                   functools.partial(change_adjective, 'fried')]},
-    'tofu': {'substitutions': [functools.partial(change_name, 'pork')]},
-    'lentils': {'substitutions': [functools.partial(change_name, 'beef')]},
+                                   functools.partial(change_adjective, 'fried'),
+                                   functools.partial(change_category, 'meat')]},
+    'tofu': {'substitutions': [functools.partial(change_name, 'pork'),
+                               functools.partial(change_category, 'meat')]},
+    'lentils': {'substitutions': [functools.partial(change_name, 'beef'),
+                                  functools.partial(change_category, 'meat')]},
     'mushroom': {'substitutions': [functools.partial(change_name, 'steak'),
-                                   functools.partial(change_adjective, '')]},
-    'seitan': {'substitutions': [functools.partial(change_adjective, 'bacon')]},
+                                   functools.partial(change_adjective, ''),
+                                   functools.partial(change_category, 'meat')]},
+    'seitan': {'substitutions': [functools.partial(change_name, 'bacon'),
+                                 functools.partial(change_category, 'meat')]},
+    'tempeh': {'substitutions': [functools.partial(change_name, 'fish'),
+                                 functools.partial(change_category, 'meat')]},
 }
 non_vegetarian_substitutions_adjectives = {}
 non_vegetarian_substitutions_categories = {}
@@ -781,15 +807,50 @@ thai_substitutions_adjectives = {
     'whole-wheat': {'substitutions': [functools.partial(change_adjective, 'rice')]},
 }
 thai_substitutions_categories = {
-    'sauce': {'substitutions': [functools.partial(change_adjective, 'thai'),
-                                functools.partial(change_name, 'curry paste')]},
+    'pepper': {'substitutions': [functools.partial(change_adjective, 'chili')]}
 }
 thai_substitutions_exceptions = {
     'soy sauce': [functools.partial(change_name, 'fish sauce'),
                   functools.partial(change_adjective, 'thai')],
-    'lemon zest': [functools.partial(change_name, 'lemongrass')],
-    'large onion': {'substitutions': [functools.partial(change_name, 'shallots')]},
+    'lemon zest': [functools.partial(change_name, 'lemongrass'),
+                   functools.partial(change_adjective, None),
+                   functools.partial(change_category, 'herb')],
+    'large onion': {'substitutions': [functools.partial(change_name, 'shallots')]}
 }
+
+# mediterranean substitutions dictionaries
+
+mediterranean_substitutions_names = {
+    'beef': {'substitutions': [functools.partial(change_name, 'salmon')]},
+    'chicken': {'substitutions': [functools.partial(change_name, 'tuna')]},
+    'turkey': {'substitutions': [functools.partial(change_name, 'beans')]},
+    'tofu': {'substitutions': [functools.partial(change_name, 'fish'),
+                               functools.partial(change_category, 'meat')]},
+    'bacon': {'substitutions': [functools.partial(change_name, 'salmon')]},
+    'sausage': {'substitutions': [functools.partial(change_name, 'lentils')]},
+    'butter': {'substitutions': [functools.partial(change_name, 'olive oil'),
+                                 functools.partial(change_category, 'healthy_fats')]},
+    'soybean oil': {'substitutions': [functools.partial(change_name, 'sesame oil')]},
+    'corn oil': {'substitutions': [functools.partial(change_name, 'olive oil')]},
+    'vegetable oil': {'substitutions': [functools.partial(change_name, 'olive oil')]},
+    'cottonseed oil': {'substitutions': [functools.partial(change_name, 'flaxseed oil')]},
+    'bread': {'substitutions': [functools.partial(change_name, 'pita')]},
+    'jelly': {'substitutions': [functools.partial(change_name, 'berries'),
+                                functools.partial(change_adjective, 'fresh')]},
+    'rice': {'substitutions': [functools.partial(change_adjective, 'wild'),
+                               functools.partial(change_category, 'healthy_grains')]},
+    'pasta': {'substitutions': [functools.partial(change_adjective, 'whole-wheat'),
+                                functools.partial(change_category, 'healthy_grains')]},
+}
+mediterranean_substitutions_adjectives = {}
+mediterranean_substitutions_categories = {
+    'unhealthy_fats': {'substitutions': [functools.partial(change_name, 'olive oil'),
+                                         functools.partial(change_category, 'healthy_fats')]},
+    'unhealthy_dairy': {'substitutions': [functools.partial(change_name, 'yogurt'),
+                                          functools.partial(change_adjective, 'greek'),
+                                          functools.partial(change_category, 'healthy_dairy')]},
+}
+mediterranean_substitutions_exceptions = {}
 
 
 # helper functions
@@ -966,7 +1027,7 @@ if __name__ == '__main__':
                 print(e)
         print('Invalid input, please try again.\n')
     while True:
-        # transformation = input('\nHow would you like to transform your recipe? Type "healthy", "unhealthy", "vegetarian", "meatify", or "thai": ')
+        # transformation = input('\nHow would you like to transform your recipe? Type "healthy", "unhealthy", "vegetarian", "meatify", "mediterranean", or "thai": ')
 
         transformation = 'vegetarian'
 
@@ -984,5 +1045,8 @@ if __name__ == '__main__':
             break
         elif transformation == 'thai':
             recipe.make_thai()
+            break
+        elif transformation == 'mediterranean':
+            recipe.make_mediterranean()
             break
         print('Invalid input, please try again.')
