@@ -27,6 +27,13 @@ try:
     nltk.data.find('tokenizers/punkt')
 except LookupError:
     nltk.download('punkt')
+
+try:
+    nltk.data.find('wordnet')
+except LookupError:
+    nltk.download('wordnet')
+
+# global variables for stopwords, custom methods/tools/units arrays
 STOPWORDS = nltk.corpus.stopwords.words('english')
 PUNCTUATION = [',', '.', '!', '?', '(', ')']
 STOPWORDS.extend(PUNCTUATION)
@@ -36,6 +43,7 @@ UNITS = ['tablespoon', 'teaspoon', 'cup', 'clove', 'pound']
 
 
 # categorized foods (found at https://github.com/olivergoodman/food-recipes/blob/master/transforms.py)
+# ingredient categories dictionary
 
 INGREDIENT_CATEGORIES = {
     'healthy_fats': ['olive oil', 'sunflower oil', 'soybean oil', 'corn oil',  'sesame oil',  'peanut oil'],
@@ -68,6 +76,8 @@ INGREDIENT_CATEGORIES = {
 
 }
 
+# custom synonym dictionary
+
 SYNONYMS = {
     'stock': 'broth',
 }
@@ -88,7 +98,7 @@ class Recipe:
         self.steps = self.get_steps()
         # get recipe tools
         self.tools, methods_counter = self.get_tools_methods()
-        # get primary method (most mentioned) and any other methods
+        # get primary method and any other methods
         self.primary_method = methods_counter.most_common(1)[0][0]
         del methods_counter[self.primary_method]
         self.other_methods = list(methods_counter)
@@ -118,6 +128,7 @@ class Recipe:
         return steps
 
     def get_tools_methods(self):
+        # get tools and methods from a recipe
         global STOPWORDS
         global METHODS
         global TOOLS
@@ -177,8 +188,9 @@ class Recipe:
         #     step.text = altered_step_text[:-1]
 
     def make_healthy(self):
+        # change recipe from unhealthy to healthy
         print('\nMaking healthy...')
-        # Baking substitutions
+        # baking substitutions
         if self.bake:
             # substitution dictionaries
             global healthy_baking_substitutions_names
@@ -231,6 +243,7 @@ class Recipe:
             print(step)
 
     def make_unhealthy(self):
+        # change recipe from healthy to unhealthy
         print('\nMaking unhealthy...')
         # Baking substitutions
         if self.bake:
@@ -300,6 +313,7 @@ class Recipe:
             print(step)
 
     def make_vegetarian(self):
+        # change recipe from non vegetarian to vegetarian
         # vegetarian substitution dictionaries
         global vegetarian_substitutions_names
         global vegetarian_substitutions_adjectives
@@ -321,6 +335,7 @@ class Recipe:
             print(step)
 
     def make_non_vegetarian(self):
+        # change recipe from vegetarian to non vegetarian
         # meatify substitution dictionaries
         global non_vegetarian_substitutions_names
         global non_vegetarian_substitutions_adjectives
@@ -342,6 +357,7 @@ class Recipe:
             print(step)
 
     def make_thai(self):
+        # change recipe to thai style of cuisine
         # thai substitution dictionaries
         global thai_substitutions_names
         global thai_substitutions_adjectives
@@ -363,6 +379,7 @@ class Recipe:
             print(step)
 
     def make_mediterranean(self):
+        # change recipe to mediterranean style of cuisine
         # mediterranean substitution dictionaries
         global mediterranean_substitutions_names
         global mediterranean_substitutions_adjectives
@@ -384,6 +401,7 @@ class Recipe:
             print(step)
 
     def print_recipe(self):
+        # print information of a recipe
         print('\nName:', self.name)
         print('\nIngredients:')
         for ingredient in self.ingredients:
@@ -397,6 +415,7 @@ class Recipe:
             print(step)
 
     def jsonify(self):
+        # make a recipe into a json format
         recipe = {'ingredients': self.ingredients,
                   'tools': self.tools,
                   'primary_method': self.primary_method,
@@ -477,6 +496,7 @@ class Ingredient:
 
 # ingredient instantiation functions
 
+# create an instance of ingredient class
 def ingredient_base(ingredient):
     ingredient.name = ingredient.adjective
     ingredient.adjective = None
@@ -494,7 +514,7 @@ def ingredient_categorize(ingredient):
 def ingredient_delta(name, adjective, category, delta, ingredient):
     return Ingredient(name, adjective, category, ingredient.amount*delta, ingredient.unit)
 
-
+# ignore ingredient
 def ingredient_ignore(name, adjective, category, amount, unit, ingredient):
     return Ingredient(name, adjective, category, amount, unit)
 
@@ -552,6 +572,8 @@ def change_unit(unit, ingredient):
 
 
 # healthy substitutions dictionaries
+# key: material to be replaced
+# value: function to change certain fields of ingredient class instance
 
 healthy_substitutions_names = {
     'shortening': {'substitutions': [functools.partial(change_amount, 0.5)],
@@ -955,6 +977,7 @@ mediterranean_substitutions_exceptions = {}
 
 # helper functions
 
+# create ingredient instance from information of ingredient_text
 def add_ingredient(ingredient_text):
     global INGREDIENT_CATEGORIES
     global SYNONYMS
@@ -1040,7 +1063,7 @@ def add_ingredient(ingredient_text):
 
     return Ingredient(name, adjective, category, amount, unit)
 
-
+# substitute ingredient given ingredients and fields
 def make_substitutions_with(ingredients, ingredient_switches, names, adjectives, categories, exceptions, vegetarian):
     global INGREDIENT_CATEGORIES
     added_ingredients = []
@@ -1094,7 +1117,7 @@ def make_substitutions_with(ingredients, ingredient_switches, names, adjectives,
         if not combined:
             ingredients.append(added_ingredient)
 
-
+# substitute, add or remove ingredient
 def make_substitutions(ingredient, substitutions, added_ingredients):
     new_name = ''
     if 'substitutions' in substitutions:
@@ -1110,8 +1133,9 @@ def make_substitutions(ingredient, substitutions, added_ingredients):
 
 
 if __name__ == '__main__':
+    # get URL from user input
     while True:
-        # url = input('Please provide a recipe URL: ')
+        #url = input('Please provide a recipe URL: ')
 
         url = 'https://www.allrecipes.com/recipe/173906/cajun-roasted-pork-loin/'
         # url = 'https://www.allrecipes.com/recipe/269944/shrimp-and-smoked-sausage-jambalaya/'
@@ -1126,11 +1150,11 @@ if __name__ == '__main__':
             except Exception as e:
                 print(e)
         print('Invalid input, please try again.\n')
+    # get recipe transformation from user input
     while True:
-        # transformation = input('\nHow would you like to transform your recipe? Type "healthy", "unhealthy", "vegetarian", "meatify", "mediterranean", or "thai": ')
+        #transformation = input('\nHow would you like to transform your recipe? Type "healthy", "unhealthy", "vegetarian", "meatify", "mediterranean", or "thai": ')
 
         transformation = 'mediterranean'
-
         if transformation == 'healthy':
             recipe.make_healthy()
             break
