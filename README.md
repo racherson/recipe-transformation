@@ -8,4 +8,4 @@ Install BeautifulSoup
 Install nltk and data
     
     pip install nltk
-    python -m nltk.downloader all
+

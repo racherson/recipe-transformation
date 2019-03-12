@@ -1121,12 +1121,12 @@ def make_substitutions(ingredient, substitutions, added_ingredients):
 
 
 if __name__ == '__main__':
-    debugging = True
+    debugging = False
     # get URL from user input
     while True:
         if debugging:
-            # url = 'https://www.allrecipes.com/recipe/173906/cajun-roasted-pork-loin/'
-            url = 'https://www.allrecipes.com/recipe/269944/shrimp-and-smoked-sausage-jambalaya/'
+            url = 'https://www.allrecipes.com/recipe/173906/cajun-roasted-pork-loin/'
+            # url = 'https://www.allrecipes.com/recipe/269944/shrimp-and-smoked-sausage-jambalaya/'
         else:
             url = str(input('Please provide a recipe URL: '))
         if len(url) > 40 and url[:34] == 'https://www.allrecipes.com/recipe/':
@@ -1142,7 +1142,7 @@ if __name__ == '__main__':
     # get recipe transformation from user input
     while True:
         if debugging:
-            transformation = 'vegetarian'
+            transformation = 'mediterranean'
         else:
             transformation = input('\nHow would you like to transform your recipe? Type "healthy", "unhealthy",'
                                    '"vegetarian", "meatify", "mediterranean", or "thai" (without quotes): ')
