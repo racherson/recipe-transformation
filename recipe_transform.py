@@ -701,7 +701,8 @@ unhealthy_substitutions_methods = {
     'steam': 'fry',
     'grill': 'fry',
     'roast': 'fry',
-    'bake': 'fry'
+    'bake': 'fry',
+    'cook': 'fry'
 }
 
 
@@ -753,7 +754,8 @@ unhealthy_baking_substitutions_methods = {
     'sauté': 'fry',
     'steam': 'fry',
     'grill': 'fry',
-    'roast': 'fry'
+    'roast': 'fry',
+    'cook': 'fry'
 }
 
 
