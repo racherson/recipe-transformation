@@ -1081,7 +1081,7 @@ if __name__ == '__main__':
     while True:
         # transformation = input('\nHow would you like to transform your recipe? Type "healthy", "unhealthy", "vegetarian", "meatify", "mediterranean", or "thai": ')
 
-        transformation = 'mediterranean'
+        transformation = 'unhealthy'
 
         if transformation == 'healthy':
             recipe.make_healthy()
