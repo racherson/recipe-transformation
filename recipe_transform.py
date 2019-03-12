@@ -8,21 +8,6 @@ from bs4 import BeautifulSoup
 # from pprint import pprint
 
 
-# TODOs
-
-# TODO: comment code since there is no more presentation
-# TODO: include ingredient style
-# TODO: change unit when changing amount across 1 (use inflect)
-# TODO: check units when merging ingredients
-# TODO: lemmatize and conjugate when substituting methods in steps so tense is taken into consideration
-# TODO: adjust method times when substituting ingredients
-# TODO: use unique ingredients when altering steps (for loop where if full name not in use just name)
-# TODO: include added ingredient names when substituting ingredients in steps
-# TODO: add vegetarian substitutions for every type of meat
-
-
-# global variables
-
 try:
     nltk.data.find('tokenizers/punkt')
 except LookupError:
@@ -509,16 +494,6 @@ def ingredient_ignore(name, adjective, category, amount, unit, ingredient):
     return Ingredient(name, adjective, category, amount, unit)
 
 
-# query/conversion functions
-
-def categorize(ingredient):
-    return
-
-
-def convert_measure(ingredient):
-    return
-
-
 # substitution functions
 
 # change the name to the input name and return with adjective if applicable
@@ -777,8 +752,8 @@ vegetarian_substitutions_categories = {
                                functools.partial(change_adjective, None),
                                functools.partial(change_category, 'vegetable')]},
     'sausage': {'substitutions': [functools.partial(change_name, 'seitan'),
-                               functools.partial(change_adjective, None),
-                               functools.partial(change_category, 'vegetable')]},
+                                  functools.partial(change_adjective, None),
+                                  functools.partial(change_category, 'vegetable')]},
     'steak': {'substitutions': [functools.partial(change_name, 'mushroom'),
                                 functools.partial(change_adjective, 'portobello'),
                                 functools.partial(change_category, 'vegetable')]},
