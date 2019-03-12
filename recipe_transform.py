@@ -27,6 +27,13 @@ try:
     nltk.data.find('tokenizers/punkt')
 except LookupError:
     nltk.download('punkt')
+
+try:
+    nltk.data.find('wordnet')
+except LookupError:
+    nltk.download('wordnet')
+
+# global variables for stopwords, custom methods/tools/units arrays
 STOPWORDS = nltk.corpus.stopwords.words('english')
 PUNCTUATION = [',', '.', '!', '?', '(', ')']
 STOPWORDS.extend(PUNCTUATION)
@@ -36,6 +43,7 @@ UNITS = ['tablespoon', 'teaspoon', 'cup', 'clove', 'pound']
 
 
 # categorized foods (found at https://github.com/olivergoodman/food-recipes/blob/master/transforms.py)
+# ingredient categories dictionary
 
 INGREDIENT_CATEGORIES = {
     'healthy_fats': ['olive oil', 'sunflower oil', 'soybean oil', 'corn oil',  'sesame oil',  'peanut oil'],
@@ -68,6 +76,8 @@ INGREDIENT_CATEGORIES = {
 
 }
 
+# custom synonym dictionary
+
 SYNONYMS = {
     'stock': 'broth',
 }
@@ -88,10 +98,11 @@ class Recipe:
         self.steps = self.get_steps()
         # get recipe tools
         self.tools, methods_counter = self.get_tools_methods()
-        # get primary method (most mentioned) and any other methods
+        # get primary method and any other methods
         self.primary_method = methods_counter.most_common(1)[0][0]
         del methods_counter[self.primary_method]
         self.other_methods = list(methods_counter)
+        # check to see if recipe is for baking or not
         if self.primary_method == 'bake' or 'bake' in self.other_methods:
             self.bake = True
         else:
@@ -107,20 +118,24 @@ class Recipe:
         # get steps from soup
         steps_elements = self.soup.find('ol', class_='list-numbers recipe-directions__list')('li')
         steps = []
+        # format steps to be numbered
         for count, step_element in enumerate(steps_elements):
             step_text = str(count+1) + '. ' + step_element.find('span').string.strip()
+            # account for ingredient synonyms
             for synonym in SYNONYMS:
                 step_text = step_text.replace(synonym, SYNONYMS[synonym])
             steps.append(Step(step_text, self.ingredients))
         return steps
 
     def get_tools_methods(self):
+        # get tools and methods from a recipe
         global STOPWORDS
         global METHODS
         global TOOLS
         tools = set()  # unique set
         methods_counter = collections.Counter()  # frequency mapping
         for step in self.steps:
+            # tokenize each step
             tokens = nltk.word_tokenize(step.text)
             tokens = [token.lower() for token in tokens if token not in STOPWORDS]
             bigrams = nltk.bigrams(tokens)
@@ -143,12 +158,14 @@ class Recipe:
         return list(tools), methods_counter
 
     def alter_steps(self):
-
+        # alter the step text with the ingredient and method substitutions made
         word_ends = [' ', '.', ',']
         for step in self.steps:
+            # replace ingredients
             for switch in self.ingredient_switches:
                 for word_end in word_ends:
                     step.text = step.text.replace(switch + word_end, self.ingredient_switches[switch] + word_end)
+            # replace methods
             for switch in self.method_switches:
                 for word_end in word_ends:
                     step.text = step.text.replace(switch + word_end, self.method_switches[switch] + word_end)
@@ -171,14 +188,18 @@ class Recipe:
         #     step.text = altered_step_text[:-1]
 
     def make_healthy(self):
+        # change recipe from unhealthy to healthy
         print('\nMaking healthy...')
+        # baking substitutions
         if self.bake:
+            # substitution dictionaries
             global healthy_baking_substitutions_names
             global healthy_baking_substitutions_adjectives
             global healthy_baking_substitutions_categories
             global healthy_baking_substitutions_exceptions
             global healthy_baking_substitutions_methods
             for step in self.steps:
+                # look through each ingredient substitution dictionary and make the changes
                 make_substitutions_with(step.ingredients,
                                         self.ingredient_switches,
                                         healthy_baking_substitutions_names,
@@ -186,16 +207,21 @@ class Recipe:
                                         healthy_baking_substitutions_categories,
                                         healthy_baking_substitutions_exceptions,
                                         False)
+                # look through the method substitution dictionary
                 for method in step.methods:
                     if method in healthy_baking_substitutions_methods:
+                        # find substitutions to be made
                         self.method_switches[method] = healthy_baking_substitutions_methods[method]
+                # make the substitution in the step's method list
                 step.methods = [self.method_switches[x] if x in self.method_switches else x for x in step.methods]
-        else:
+        else:  # non-baking substitutions
+            # substitution dictionaries
             global healthy_substitutions_names
             global healthy_substitutions_adjectives
             global healthy_substitutions_categories
             global healthy_substitutions_exceptions
             global healthy_substitutions_methods
+            # look through each ingredient substitution dictionary and make the changes
             for step in self.steps:
                 make_substitutions_with(step.ingredients,
                                         self.ingredient_switches,
@@ -204,9 +230,12 @@ class Recipe:
                                         healthy_substitutions_categories,
                                         healthy_substitutions_exceptions,
                                         False)
+                # look through the method substitution dictionary
                 for method in step.methods:
                     if method in healthy_substitutions_methods:
+                        # find substitutions to be made
                         self.method_switches[method] = healthy_substitutions_methods[method]
+                # make the substitution in the step's method list
                 step.methods = [self.method_switches[x] if x in self.method_switches else x for x in step.methods]
         self.alter_steps()
         print('\nAltered Steps:')
@@ -214,8 +243,11 @@ class Recipe:
             print(step)
 
     def make_unhealthy(self):
+        # change recipe from healthy to unhealthy
         print('\nMaking unhealthy...')
+        # Baking substitutions
         if self.bake:
+            # substitution dictionaries
             global unhealthy_baking_substitutions_names
             global unhealthy_baking_substitutions_adjectives
             global unhealthy_baking_substitutions_categories
@@ -230,16 +262,19 @@ class Recipe:
                                         unhealthy_baking_substitutions_exceptions,
                                         False)
                 for method in step.methods:
+                    # find method substitutions to be made
                     if method in unhealthy_baking_substitutions_methods:
                         self.method_switches[method] = unhealthy_baking_substitutions_methods[method]
+                # make the substitution in the method list
                 step.methods = [self.method_switches[x] if x in self.method_switches else x for x in step.methods]
-        else:
+        else:  # non-baking substitution dictionaries
             global unhealthy_substitutions_names
             global unhealthy_substitutions_adjectives
             global unhealthy_substitutions_categories
             global unhealthy_substitutions_exceptions
             global unhealthy_substitutions_methods
             for step in self.steps:
+                # substitute ingredients
                 make_substitutions_with(step.ingredients,
                                         self.ingredient_switches,
                                         unhealthy_substitutions_names,
@@ -247,6 +282,7 @@ class Recipe:
                                         unhealthy_substitutions_categories,
                                         unhealthy_substitutions_exceptions,
                                         False)
+                # substitute methods
                 for method in step.methods:
                     if method in unhealthy_substitutions_methods:
                         self.method_switches[method] = unhealthy_substitutions_methods[method]
@@ -254,6 +290,7 @@ class Recipe:
         self.alter_steps()
         next_count = int(self.steps[-1].text[0]) + 1
         if not self.bake:
+            # if non-baking recipe, add extra salt step/ingredient
             salt = Ingredient('salt', None, 'seasoning', None, None)
             self.ingredients.append(salt)
             step_text = str(next_count) + '. Sprinkle a lot of extra salt over the whole meal.'
@@ -261,6 +298,7 @@ class Recipe:
             new_step.methods = ['sprinkle']
             self.steps.append(new_step)
         else:
+            # if baking recipe, add extra frosting step/ingredient
             frosting = Ingredient('frosting', 'chocolate', 'topping', 2, 'cups')
             self.ingredients.append(frosting)
             step_text = str(next_count) + '. Spread frosting over everything.'
@@ -275,12 +313,15 @@ class Recipe:
             print(step)
 
     def make_vegetarian(self):
+        # change recipe from non vegetarian to vegetarian
+        # vegetarian substitution dictionaries
         global vegetarian_substitutions_names
         global vegetarian_substitutions_adjectives
         global vegetarian_substitutions_categories
         global vegetarian_substitutions_exceptions
         print('\nMaking vegetarian...')
         for step in self.steps:
+            # make all ingredient substitutions
             make_substitutions_with(step.ingredients,
                                     self.ingredient_switches,
                                     vegetarian_substitutions_names,
@@ -294,12 +335,15 @@ class Recipe:
             print(step)
 
     def make_non_vegetarian(self):
+        # change recipe from vegetarian to non vegetarian
+        # meatify substitution dictionaries
         global non_vegetarian_substitutions_names
         global non_vegetarian_substitutions_adjectives
         global non_vegetarian_substitutions_categories
         global non_vegetarian_substitutions_exceptions
         print('\nMaking non-vegetarian...')
         for step in self.steps:
+            # make all ingredient substitutions
             make_substitutions_with(step.ingredients,
                                     self.ingredient_switches,
                                     non_vegetarian_substitutions_names,
@@ -313,12 +357,15 @@ class Recipe:
             print(step)
 
     def make_thai(self):
+        # change recipe to thai style of cuisine
+        # thai substitution dictionaries
         global thai_substitutions_names
         global thai_substitutions_adjectives
         global thai_substitutions_categories
         global thai_substitutions_exceptions
         print('\nMaking Thai...')
         for step in self.steps:
+            # make all ingredient substitutions
             make_substitutions_with(step.ingredients,
                                     self.ingredient_switches,
                                     thai_substitutions_names,
@@ -332,12 +379,15 @@ class Recipe:
             print(step)
 
     def make_mediterranean(self):
+        # change recipe to mediterranean style of cuisine
+        # mediterranean substitution dictionaries
         global mediterranean_substitutions_names
         global mediterranean_substitutions_adjectives
         global mediterranean_substitutions_categories
         global mediterranean_substitutions_exceptions
         print('\nMaking Mediterranean...')
         for step in self.steps:
+            # make all ingredient substitutions
             make_substitutions_with(step.ingredients,
                                     self.ingredient_switches,
                                     mediterranean_substitutions_names,
@@ -351,6 +401,7 @@ class Recipe:
             print(step)
 
     def print_recipe(self):
+        # print information of a recipe
         print('\nName:', self.name)
         print('\nIngredients:')
         for ingredient in self.ingredients:
@@ -364,6 +415,7 @@ class Recipe:
             print(step)
 
     def jsonify(self):
+        # make a recipe into a json format
         recipe = {'ingredients': self.ingredients,
                   'tools': self.tools,
                   'primary_method': self.primary_method,
@@ -378,16 +430,20 @@ class Recipe:
 
 class Step:
     def __init__(self, step_text, ingredients):
+        # each step has text, ingredients used in it, and methods used in it
         self.text = step_text
         self.ingredients = []
         self.methods = None
         ingredients_dict = {}
+        # group ingredients by core name (excluding unique adjectives)
         for ingredient in ingredients:
             if ingredient.name in ingredients_dict:
                 ingredients_dict[ingredient.name].append(ingredient)
             else:
                 ingredients_dict[ingredient.name] = [ingredient]
+
         unique_ingredients_dict = {}
+        # get all unique ingredient names by including adjectives
         for ingredient in ingredients_dict:
             if len(ingredients_dict[ingredient]) == 1:
                 unique_ingredients_dict[ingredient] = ingredients_dict[ingredient][0]
@@ -399,10 +455,12 @@ class Step:
                     else:
                         unique_ingredients_dict[ingredient] = ingredient_ref
         for ingredient in unique_ingredients_dict:
+            # if an ingredient is in the current step, add to the step's ingredient list
             if ingredient in step_text.lower():
                 self.ingredients.append(unique_ingredients_dict[ingredient])
 
     def __str__(self):
+        # print out ingredients and methods separately
         output = self.text + '\nStep Ingredients:  '
         for ingredient in self.ingredients:
             output += str(ingredient) + ', '
@@ -416,6 +474,7 @@ class Step:
 
 class Ingredient:
     def __init__(self, name, adjective, category, amount, unit):
+        # each ingredient can have a core name, adjective descriptor, food category, amount, and unit
         self.name = name
         self.adjective = adjective
         self.category = category
@@ -424,6 +483,8 @@ class Ingredient:
 
     def __str__(self):
         output = ''
+        # print out amount, unit, adjective, and name
+        # i.e. 1 cup olive oil
         if self.amount:
             output += str(self.amount) + ' '
         if self.unit:
@@ -435,6 +496,7 @@ class Ingredient:
 
 # ingredient instantiation functions
 
+# create an instance of ingredient class
 def ingredient_base(ingredient):
     ingredient.name = ingredient.adjective
     ingredient.adjective = None
@@ -448,10 +510,11 @@ def ingredient_categorize(ingredient):
     return Ingredient(ingredient.name, ingredient.adjective, ingredient.category, ingredient.amount, ingredient.unit)
 
 
+# make a new ingredient
 def ingredient_delta(name, adjective, category, delta, ingredient):
     return Ingredient(name, adjective, category, ingredient.amount*delta, ingredient.unit)
 
-
+# ignore ingredient
 def ingredient_ignore(name, adjective, category, amount, unit, ingredient):
     return Ingredient(name, adjective, category, amount, unit)
 
@@ -468,6 +531,7 @@ def convert_measure(ingredient):
 
 # substitution functions
 
+# change the name to the input name and return with adjective if applicable
 def change_name(name, ingredient):
     ingredient.name = name
     if ingredient.adjective:
@@ -475,6 +539,7 @@ def change_name(name, ingredient):
     return ingredient.name
 
 
+# change the adjective of an ingredient and return the name and adjective full name
 def change_adjective(adjective, ingredient):
     ingredient.adjective = adjective
     if ingredient.adjective:
@@ -482,6 +547,7 @@ def change_adjective(adjective, ingredient):
     return ingredient.name
 
 
+# change the food category and return the name and adjective full name
 def change_category(category, ingredient):
     ingredient.category = category
     if ingredient.adjective:
@@ -489,6 +555,7 @@ def change_category(category, ingredient):
     return ingredient.name
 
 
+# change the amount of the ingredient and return the name, adjective full name
 def change_amount(delta, ingredient):
     ingredient.amount *= delta
     if ingredient.adjective:
@@ -496,6 +563,7 @@ def change_amount(delta, ingredient):
     return ingredient.name
 
 
+# change the unit of the ingredient and return the name, adjective full name
 def change_unit(unit, ingredient):
     ingredient.unit = unit
     if ingredient.adjective:
@@ -504,6 +572,8 @@ def change_unit(unit, ingredient):
 
 
 # healthy substitutions dictionaries
+# key: material to be replaced
+# value: function to change certain fields of ingredient class instance
 
 healthy_substitutions_names = {
     'shortening': {'substitutions': [functools.partial(change_amount, 0.5)],
@@ -907,6 +977,7 @@ mediterranean_substitutions_exceptions = {}
 
 # helper functions
 
+# create ingredient instance from information of ingredient_text
 def add_ingredient(ingredient_text):
     global INGREDIENT_CATEGORIES
     global SYNONYMS
@@ -992,7 +1063,7 @@ def add_ingredient(ingredient_text):
 
     return Ingredient(name, adjective, category, amount, unit)
 
-
+# substitute ingredient given ingredients and fields
 def make_substitutions_with(ingredients, ingredient_switches, names, adjectives, categories, exceptions, vegetarian):
     global INGREDIENT_CATEGORIES
     added_ingredients = []
@@ -1046,7 +1117,7 @@ def make_substitutions_with(ingredients, ingredient_switches, names, adjectives,
         if not combined:
             ingredients.append(added_ingredient)
 
-
+# substitute, add or remove ingredient
 def make_substitutions(ingredient, substitutions, added_ingredients):
     new_name = ''
     if 'substitutions' in substitutions:
@@ -1062,8 +1133,9 @@ def make_substitutions(ingredient, substitutions, added_ingredients):
 
 
 if __name__ == '__main__':
+    # get URL from user input
     while True:
-        # url = input('Please provide a recipe URL: ')
+        #url = input('Please provide a recipe URL: ')
 
         url = 'https://www.allrecipes.com/recipe/173906/cajun-roasted-pork-loin/'
         # url = 'https://www.allrecipes.com/recipe/269944/shrimp-and-smoked-sausage-jambalaya/'
@@ -1078,11 +1150,11 @@ if __name__ == '__main__':
             except Exception as e:
                 print(e)
         print('Invalid input, please try again.\n')
+    # get recipe transformation from user input
     while True:
-        # transformation = input('\nHow would you like to transform your recipe? Type "healthy", "unhealthy", "vegetarian", "meatify", "mediterranean", or "thai": ')
+        #transformation = input('\nHow would you like to transform your recipe? Type "healthy", "unhealthy", "vegetarian", "meatify", "mediterranean", or "thai": ')
 
-        transformation = 'unhealthy'
-
+        transformation = 'mediterranean'
         if transformation == 'healthy':
             recipe.make_healthy()
             break
