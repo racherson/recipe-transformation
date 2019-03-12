@@ -27,13 +27,14 @@ try:
     nltk.data.find('tokenizers/punkt')
 except LookupError:
     nltk.download('punkt')
-
 try:
     nltk.data.find('wordnet')
 except LookupError:
     nltk.download('wordnet')
 
+
 # global variables for stopwords, custom methods/tools/units arrays
+
 STOPWORDS = nltk.corpus.stopwords.words('english')
 PUNCTUATION = [',', '.', '!', '?', '(', ')']
 STOPWORDS.extend(PUNCTUATION)
@@ -42,8 +43,7 @@ TOOLS = ['pan', 'grater', 'whisk', 'pot', 'spatula', 'tong', 'oven', 'knife']
 UNITS = ['tablespoon', 'teaspoon', 'cup', 'clove', 'pound']
 
 
-# categorized foods (found at https://github.com/olivergoodman/food-recipes/blob/master/transforms.py)
-# ingredient categories dictionary
+# categorized ingredients dictionary (found at https://github.com/olivergoodman/food-recipes/blob/master/transforms.py)
 
 INGREDIENT_CATEGORIES = {
     'healthy_fats': ['olive oil', 'sunflower oil', 'soybean oil', 'corn oil',  'sesame oil',  'peanut oil'],
@@ -73,7 +73,6 @@ INGREDIENT_CATEGORIES = {
     'herb': ['basil', 'bay leaves', 'celery flakes', 'chervil', 'cilantro', 'curry', 'dill weed', 'dried chives',
              'epatoze', 'file powder', 'kaffire lime', 'lavender', 'lemongrass', 'mint', 'oregano', 'parsley',
              'rosemary', 'sage', 'tarragon', 'thyme']
-
 }
 
 # custom synonym dictionary
@@ -169,23 +168,6 @@ class Recipe:
             for switch in self.method_switches:
                 for word_end in word_ends:
                     step.text = step.text.replace(switch + word_end, self.method_switches[switch] + word_end)
-
-        # global PUNCTUATION
-        # for step in self.steps:
-        #     tokens = nltk.word_tokenize(step.text)
-        #     altered_step_text = ''
-        #     for token in tokens:
-        #         if token == '(':
-        #             altered_step_text += token
-        #         elif token in PUNCTUATION:
-        #             altered_step_text = altered_step_text[:-1] + token + ' '
-        #         elif token.lower() in self.ingredient_switches:
-        #             altered_step_text += self.ingredient_switches[token.lower()] + ' '
-        #         elif token.lower in self.method_switches:
-        #             altered_step_text += self.method_switches[token.lower()] + ' '
-        #         else:
-        #             altered_step_text += token + ' '
-        #     step.text = altered_step_text[:-1]
 
     def make_healthy(self):
         # change recipe from unhealthy to healthy
@@ -441,7 +423,6 @@ class Step:
                 ingredients_dict[ingredient.name].append(ingredient)
             else:
                 ingredients_dict[ingredient.name] = [ingredient]
-
         unique_ingredients_dict = {}
         # get all unique ingredient names by including adjectives
         for ingredient in ingredients_dict:
@@ -496,13 +477,14 @@ class Ingredient:
 
 # ingredient instantiation functions
 
-# create an instance of ingredient class
+# create an ingredient which is the base of the source ingredient's adjective
 def ingredient_base(ingredient):
     ingredient.name = ingredient.adjective
     ingredient.adjective = None
     return ingredient_categorize(ingredient)
 
 
+# create an ingredient and categorize it
 def ingredient_categorize(ingredient):
     # category = categorize(ingredient)
     # amount, unit = convert_measure(ingredient)
@@ -510,11 +492,12 @@ def ingredient_categorize(ingredient):
     return Ingredient(ingredient.name, ingredient.adjective, ingredient.category, ingredient.amount, ingredient.unit)
 
 
-# make a new ingredient
+# make a new ingredient with a linearly proportionate amount
 def ingredient_delta(name, adjective, category, delta, ingredient):
     return Ingredient(name, adjective, category, ingredient.amount*delta, ingredient.unit)
 
-# ignore ingredient
+
+# make a completely new ingredient
 def ingredient_ignore(name, adjective, category, amount, unit, ingredient):
     return Ingredient(name, adjective, category, amount, unit)
 
@@ -573,7 +556,7 @@ def change_unit(unit, ingredient):
 
 # healthy substitutions dictionaries
 # key: material to be replaced
-# value: function to change certain fields of ingredient class instance
+# value: dictionary of partial functions later called with ingredient arguments to substitute/add/remove ingredients
 
 healthy_substitutions_names = {
     'shortening': {'substitutions': [functools.partial(change_amount, 0.5)],
@@ -931,6 +914,7 @@ thai_substitutions_exceptions = {
     'large onion': {'substitutions': [functools.partial(change_name, 'shallots')]}
 }
 
+
 # mediterranean substitutions dictionaries
 
 mediterranean_substitutions_names = {
@@ -985,44 +969,44 @@ def add_ingredient(ingredient_text):
     category = None
     amount = None
     unit = None
-    ingredient_parts = ingredient_text.split(', ')
+    ingredient_parts = ingredient_text.split(', ')  # split phrases if applicable
     ingredient = ingredient_parts[0]
     if len(ingredient_parts) > 1:
-        ingredient_style = ingredient_parts[1]
+        ingredient_style = ingredient_parts[1]  # add latter phrase as style
     if 'to taste' in ingredient:
 
         print('\ningred name:', ingredient.replace(' to taste', ''))
 
-        return Ingredient(ingredient.replace(' to taste', ''), None, None, None, None)
-    ingredient_words = ingredient.split()
-    name = ingredient_words[-1]
+        return Ingredient(ingredient.replace(' to taste', ''), None, None, None, None)  # adjust for salt and pepper
+    ingredient_words = ingredient.split()  # split ingredient into words
+    name = ingredient_words[-1]  # assign last word to name
     ingredient_words = ingredient_words[:-1]
-    if ingredient_words and ingredient_words[0][0].isdigit():
-        if '/' in ingredient_words[0]:
+    if ingredient_words and ingredient_words[0][0].isdigit():  # if words start with a number, make it the amount
+        if '/' in ingredient_words[0]:  # fractions
             amount_split = ingredient_words[0].split('/')
             amount = int(amount_split[0]) / int(amount_split[1])
         else:
             amount = float(ingredient_words[0])
         ingredient_words = ingredient_words[1:]
     if ingredient_words and amount:
-        if ingredient_words[0][0] == '(' and ingredient_words[0][1].isdigit():
+        if ingredient_words[0][0] == '(' and ingredient_words[0][1].isdigit():  # account for alternative measurements
             amount = ingredient_words[0][1:]
             unit = ingredient_words[1][:-1]
             ingredient_words = ingredient_words[2:]
         else:
             pos = set()
-            for synset in nltk.corpus.wordnet.synsets(ingredient_words[0]):
+            for synset in nltk.corpus.wordnet.synsets(ingredient_words[0]):  # get POS tagging for the word
                 if synset.name().split('.')[0] == ingredient_words[0]:
                     pos.add(synset.pos())
-            if 'a' not in pos and 's' not in pos:
+            if 'a' not in pos and 's' not in pos:  # if not an adjective, add it as the amount
                 unit = ingredient_words[0]
                 ingredient_words = ingredient_words[1:]
     for word in ingredient_words:
         pos = set()
-        for synset in nltk.corpus.wordnet.synsets(word):
+        for synset in nltk.corpus.wordnet.synsets(word):  # POS tagging
             if synset.name().split('.')[0] == word:
                 pos.add(synset.pos())
-        if not pos or 'a' in pos or 's' in pos or 'v' in pos:
+        if not pos or 'a' in pos or 's' in pos or 'v' in pos:  # if word is an adjective or verb, add to adjective
             if not adjective:
                 adjective = word
             else:
@@ -1043,18 +1027,18 @@ def add_ingredient(ingredient_text):
             adjective += ' ' + word
 
     if name in SYNONYMS:
-        name = SYNONYMS[name]
+        name = SYNONYMS[name]  # replace synonyms
     full_name = name
     if adjective:
         full_name = adjective + name
-    for meat in INGREDIENT_CATEGORIES['meat']:
+    for meat in INGREDIENT_CATEGORIES['meat']:  # categorize meats
         if meat in full_name:
             category = meat
-
-    for key, val in INGREDIENT_CATEGORIES.items():
+    for key, val in INGREDIENT_CATEGORIES.items():  # categorize other types of ingredients
         if (full_name in val or name in val) and category is None:
             category = key
 
+    # debugging
     print('\ningred amt:', str(amount))
     print('ingred unit:', unit)
     print('ingred adj:', adjective)
@@ -1063,51 +1047,52 @@ def add_ingredient(ingredient_text):
 
     return Ingredient(name, adjective, category, amount, unit)
 
-# substitute ingredient given ingredients and fields
+
+# substitute ingredients, parametrized with ingredients and substitution dictionaries
 def make_substitutions_with(ingredients, ingredient_switches, names, adjectives, categories, exceptions, vegetarian):
     global INGREDIENT_CATEGORIES
     added_ingredients = []
     removed_ingredients = []
-    for ingredient in ingredients:
+    for ingredient in ingredients:  # for every ingredient
         name = ingredient.name
         full_name = name
         if ingredient.adjective:
             full_name = ingredient.adjective + ' ' + full_name
-        if full_name in exceptions:
+        if full_name in exceptions:  # make exceptions substitutions
             removed, new_name = make_substitutions(ingredient, exceptions[full_name], added_ingredients)
-            ingredient_switches[full_name] = new_name
-            ingredient_switches[name] = ingredient.name
+            ingredient_switches[full_name] = new_name  # add full name to ingredient_switches dict
+            ingredient_switches[name] = ingredient.name  # and after, name (full name is triggered first)
             if removed:
                 removed_ingredients.append(ingredient)
             continue
-        if name in names:
+        if name in names:  # name substitutions
             removed, new_name = make_substitutions(ingredient, names[name], added_ingredients)
             ingredient_switches[full_name] = new_name
             ingredient_switches[name] = ingredient.name
             if removed:
                 removed_ingredients.append(ingredient)
                 continue
-        if ingredient.adjective in adjectives:
+        if ingredient.adjective in adjectives:  # adjective substitutions
             removed, new_name = make_substitutions(ingredient, adjectives[ingredient.adjective], added_ingredients)
             ingredient_switches[full_name] = new_name
             ingredient_switches[name] = ingredient.name
             if removed:
                 removed_ingredients.append(ingredient)
                 continue
-        if ingredient.category in categories:
+        if ingredient.category in categories:  # category substitutions
             category = ingredient.category
             removed, new_name = make_substitutions(ingredient, categories[category], added_ingredients)
             ingredient_switches[full_name] = new_name
             ingredient_switches[name] = ingredient.name
-            if vegetarian and category in INGREDIENT_CATEGORIES['meat']:
+            if vegetarian and category in INGREDIENT_CATEGORIES['meat']:  # exception for vegetarian
                 ingredient_switches[' ' + category] = ''
                 ingredient_switches['meat'] = new_name
             if removed:
                 removed_ingredients.append(ingredient)
                 continue
-    for ingredient in removed_ingredients:
+    for ingredient in removed_ingredients:  # remove ingredients
         ingredients.remove(ingredient)
-    for added_ingredient in added_ingredients:
+    for added_ingredient in added_ingredients:  # add ingredients, combining if the same
         combined = False
         for ingredient in ingredients:
             if ingredient.name == added_ingredient.name and ingredient.adjective == added_ingredient.adjective:
@@ -1117,7 +1102,8 @@ def make_substitutions_with(ingredients, ingredient_switches, names, adjectives,
         if not combined:
             ingredients.append(added_ingredient)
 
-# substitute, add or remove ingredient
+
+# use partial functions in substitution dictionaries to modify, add, or remove ingredients
 def make_substitutions(ingredient, substitutions, added_ingredients):
     new_name = ''
     if 'substitutions' in substitutions:
@@ -1155,6 +1141,7 @@ if __name__ == '__main__':
         transformation = input('\nHow would you like to transform your recipe? Type "healthy", "unhealthy", "vegetarian", "meatify", "mediterranean", or "thai": ')
 
         # transformation = 'mediterranean'
+
         if transformation == 'healthy':
             recipe.make_healthy()
             break
