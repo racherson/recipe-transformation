@@ -1135,9 +1135,9 @@ def make_substitutions(ingredient, substitutions, added_ingredients):
 if __name__ == '__main__':
     # get URL from user input
     while True:
-        #url = input('Please provide a recipe URL: ')
+        url = str(input('Please provide a recipe URL: '))
 
-        url = 'https://www.allrecipes.com/recipe/173906/cajun-roasted-pork-loin/'
+        # url = 'https://www.allrecipes.com/recipe/173906/cajun-roasted-pork-loin/'
         # url = 'https://www.allrecipes.com/recipe/269944/shrimp-and-smoked-sausage-jambalaya/'
 
         if len(url) > 40 and url[:34] == 'https://www.allrecipes.com/recipe/':
@@ -1152,9 +1152,9 @@ if __name__ == '__main__':
         print('Invalid input, please try again.\n')
     # get recipe transformation from user input
     while True:
-        #transformation = input('\nHow would you like to transform your recipe? Type "healthy", "unhealthy", "vegetarian", "meatify", "mediterranean", or "thai": ')
+        transformation = input('\nHow would you like to transform your recipe? Type "healthy", "unhealthy", "vegetarian", "meatify", "mediterranean", or "thai": ')
 
-        transformation = 'mediterranean'
+        # transformation = 'mediterranean'
         if transformation == 'healthy':
             recipe.make_healthy()
             break
