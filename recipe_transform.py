@@ -2,7 +2,6 @@ import collections
 import functools
 import json
 import nltk
-# import pymongo
 import urllib.request
 from bs4 import BeautifulSoup
 # from pprint import pprint
@@ -60,10 +59,12 @@ INGREDIENT_CATEGORIES = {
              'rosemary', 'sage', 'tarragon', 'thyme']
 }
 
+
 # custom synonym dictionary
 
 SYNONYMS = {
     'stock': 'broth',
+    'cayenne': 'cayenne pepper',
 }
 
 
@@ -1102,8 +1103,8 @@ if __name__ == '__main__':
     # get URL from user input
     while True:
         if debugging:
-            url = 'https://www.allrecipes.com/recipe/173906/cajun-roasted-pork-loin/'
-            # url = 'https://www.allrecipes.com/recipe/269944/shrimp-and-smoked-sausage-jambalaya/'
+            # url = 'https://www.allrecipes.com/recipe/173906/cajun-roasted-pork-loin/'
+            url = 'https://www.allrecipes.com/recipe/269944/shrimp-and-smoked-sausage-jambalaya/'
         else:
             url = str(input('Please provide a recipe URL: '))
         if len(url) > 40 and url[:34] == 'https://www.allrecipes.com/recipe/':
