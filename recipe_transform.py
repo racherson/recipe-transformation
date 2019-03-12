@@ -168,6 +168,11 @@ class Recipe:
             for switch in self.method_switches:
                 for word_end in word_ends:
                     step.text = step.text.replace(switch + word_end, self.method_switches[switch] + word_end)
+            tokens = nltk.word_tokenize(step.text)
+            tokens = [token.lower() for token in tokens if token not in STOPWORDS]
+            tokens = [token for i, token in enumerate(tokens) if i != 0 and token == tokens[i-1]]
+            for token in tokens:
+                step.text = step.text.replace(token + ' ' + token, token)
 
     def make_healthy(self):
         # change recipe from unhealthy to healthy
@@ -442,13 +447,15 @@ class Step:
 
     def __str__(self):
         # print out ingredients and methods separately
-        output = self.text + '\nStep Ingredients:  '
-        for ingredient in self.ingredients:
-            output += str(ingredient) + ', '
-        output = output[:-2] + '\nStep Methods:  '
-        for method in self.methods:
-            output += method + ', '
-        return output[:-2]
+        if debugging:
+            output = self.text + '\nStep Ingredients:  '
+            for ingredient in self.ingredients:
+                output += str(ingredient) + ', '
+            output = output[:-2] + '\nStep Methods:  '
+            for method in self.methods:
+                output += method + ', '
+            return output[:-2]
+        return self.text
 
 
 # ingredient class definition
@@ -973,9 +980,8 @@ def add_ingredient(ingredient_text):
     if len(ingredient_parts) > 1:
         ingredient_style = ingredient_parts[1]  # add latter phrase as style
     if 'to taste' in ingredient:
-
-        print('\ningred name:', ingredient.replace(' to taste', ''))
-
+        if debugging:
+            print('\ningred name:', ingredient.replace(' to taste', ''))
         return Ingredient(ingredient.replace(' to taste', ''), None, None, None, None)  # adjust for salt and pepper
     ingredient_words = ingredient.split()  # split ingredient into words
     name = ingredient_words[-1]  # assign last word to name
@@ -1013,18 +1019,16 @@ def add_ingredient(ingredient_text):
             ingredient_words = ingredient_words[1:]
         else:
             break
-    # if ingredient_words:
-    #     prefix = ''
-    #     for word in ingredient_words:
-    #         prefix += word + ' '
-    #     name = prefix + name
-
     for word in ingredient_words:
         if not adjective:
             adjective = word
         else:
             adjective += ' ' + word
-
+    # if ingredient_words:
+    #     prefix = ''
+    #     for word in ingredient_words:
+    #         prefix += word + ' '
+    #     name = prefix + name
     if name in SYNONYMS:
         name = SYNONYMS[name]  # replace synonyms
     full_name = name
@@ -1036,14 +1040,12 @@ def add_ingredient(ingredient_text):
     for key, val in INGREDIENT_CATEGORIES.items():  # categorize other types of ingredients
         if (full_name in val or name in val) and category is None:
             category = key
-
-    # debugging
-    print('\ningred amt:', str(amount))
-    print('ingred unit:', unit)
-    print('ingred adj:', adjective)
-    print('ingred name:', name)
-    print('ingred cat:', category)
-
+    if debugging:
+        print('\ningred amt:', str(amount))
+        print('ingred unit:', unit)
+        print('ingred adj:', adjective)
+        print('ingred name:', name)
+        print('ingred cat:', category)
     return Ingredient(name, adjective, category, amount, unit)
 
 
@@ -1060,21 +1062,21 @@ def make_substitutions_with(ingredients, ingredient_switches, names, adjectives,
         if full_name in exceptions:  # make exceptions substitutions
             removed, new_name = make_substitutions(ingredient, exceptions[full_name], added_ingredients)
             ingredient_switches[full_name] = new_name  # add full name to ingredient_switches dict
-            ingredient_switches[name] = ingredient.name  # and after, name (full name is triggered first)
+            ingredient_switches[name] = new_name  # and after, name (full name is triggered first)
             if removed:
                 removed_ingredients.append(ingredient)
             continue
         if name in names:  # name substitutions
             removed, new_name = make_substitutions(ingredient, names[name], added_ingredients)
             ingredient_switches[full_name] = new_name
-            ingredient_switches[name] = ingredient.name
+            ingredient_switches[name] = new_name
             if removed:
                 removed_ingredients.append(ingredient)
                 continue
         if ingredient.adjective in adjectives:  # adjective substitutions
             removed, new_name = make_substitutions(ingredient, adjectives[ingredient.adjective], added_ingredients)
             ingredient_switches[full_name] = new_name
-            ingredient_switches[name] = ingredient.name
+            ingredient_switches[name] = new_name
             if removed:
                 removed_ingredients.append(ingredient)
                 continue
@@ -1082,10 +1084,10 @@ def make_substitutions_with(ingredients, ingredient_switches, names, adjectives,
             category = ingredient.category
             removed, new_name = make_substitutions(ingredient, categories[category], added_ingredients)
             ingredient_switches[full_name] = new_name
-            ingredient_switches[name] = ingredient.name
+            ingredient_switches[name] = new_name
             if vegetarian and category in INGREDIENT_CATEGORIES['meat']:  # exception for vegetarian
                 ingredient_switches['meat'] = new_name
-                if len(new_name.split(' ')) > 2:
+                if new_name.split(' ')[-1] != category:  # len(new_name.split(' ')) > 2:
                     ingredient_switches[' ' + category] = ''
             if removed:
                 removed_ingredients.append(ingredient)
@@ -1119,13 +1121,14 @@ def make_substitutions(ingredient, substitutions, added_ingredients):
 
 
 if __name__ == '__main__':
+    debugging = True
     # get URL from user input
     while True:
-        # url = str(input('Please provide a recipe URL: '))
-
-        # url = 'https://www.allrecipes.com/recipe/173906/cajun-roasted-pork-loin/'
-        url = 'https://www.allrecipes.com/recipe/269944/shrimp-and-smoked-sausage-jambalaya/'
-
+        if debugging:
+            # url = 'https://www.allrecipes.com/recipe/173906/cajun-roasted-pork-loin/'
+            url = 'https://www.allrecipes.com/recipe/269944/shrimp-and-smoked-sausage-jambalaya/'
+        else:
+            url = str(input('Please provide a recipe URL: '))
         if len(url) > 40 and url[:34] == 'https://www.allrecipes.com/recipe/':
             try:
                 # take url and load recipe using beautiful soup
@@ -1138,10 +1141,11 @@ if __name__ == '__main__':
         print('Invalid input, please try again.\n')
     # get recipe transformation from user input
     while True:
-        # transformation = input('\nHow would you like to transform your recipe? Type "healthy", "unhealthy", "vegetarian", "meatify", "mediterranean", or "thai": ')
-
-        transformation = 'vegetarian'
-
+        if debugging:
+            transformation = 'vegetarian'
+        else:
+            transformation = input('\nHow would you like to transform your recipe? Type "healthy", "unhealthy",'
+                                   '"vegetarian", "meatify", "mediterranean", or "thai" (without quotes): ')
         if transformation == 'healthy':
             recipe.make_healthy()
             break
