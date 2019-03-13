@@ -22,7 +22,7 @@ except LookupError:
 STOPWORDS = nltk.corpus.stopwords.words('english')
 PUNCTUATION = [',', '.', '!', '?', '(', ')']
 STOPWORDS.extend(PUNCTUATION)
-METHODS = ['add', 'use', 'blend', 'cut', 'strain', 'roast', 'slice', 'flip', 'baste', 'simmer', 'grate', 'drain', 'saute', 'broil', 'boil', 'poach', 'bake', 'grill', 'fry', 'bake', 'heat', 'mix', 'chop', 'grate', 'stir', 'shake', 'mince', 'crush', 'squeeze', 'dice', 'rub', 'cook']
+METHODS = ['blend', 'cut', 'strain', 'roast', 'slice', 'flip', 'baste', 'simmer', 'grate', 'drain', 'saute', 'broil', 'boil', 'poach', 'bake', 'grill', 'fry', 'bake', 'heat', 'mix', 'chop', 'grate', 'stir', 'shake', 'mince', 'crush', 'squeeze', 'dice', 'rub', 'cook']
 TOOLS = ['pan', 'grater', 'whisk', 'pot', 'spatula', 'tong', 'oven', 'knife']
 UNITS = ['tablespoon', 'teaspoon', 'cup', 'clove', 'pound']
 
@@ -1099,12 +1099,13 @@ def make_substitutions(ingredient, substitutions, added_ingredients):
 
 
 if __name__ == '__main__':
-    debugging = False
+    debugging = True
     # get URL from user input
     while True:
         if debugging:
             # url = 'https://www.allrecipes.com/recipe/173906/cajun-roasted-pork-loin/'
-            url = 'https://www.allrecipes.com/recipe/269944/shrimp-and-smoked-sausage-jambalaya/'
+            # url = 'https://www.allrecipes.com/recipe/269944/shrimp-and-smoked-sausage-jambalaya/'
+            url = str(input('Please provide a recipe URL: '))
         else:
             url = str(input('Please provide a recipe URL: '))
         if len(url) > 40 and url[:34] == 'https://www.allrecipes.com/recipe/':
@@ -1119,10 +1120,10 @@ if __name__ == '__main__':
         print('Invalid input, please try again.\n')
     # get recipe transformation from user input
     while True:
-        if debugging:
-            transformation = 'mediterranean'
-        else:
-            transformation = input('\nHow would you like to transform your recipe? Type "healthy", "unhealthy",'
+        # if debugging:
+        #     transformation = 'mediterranean'
+        # else:
+        transformation = input('\nHow would you like to transform your recipe? Type "healthy", "unhealthy",'
                                    '"vegetarian", "meatify", "mediterranean", or "thai" (without quotes): ')
         if transformation == 'healthy':
             recipe.make_healthy()
